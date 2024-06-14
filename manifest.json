@@ -1,0 +1,19 @@
+{
+    "manifest_version": 3,
+    "name": "Tab's Archive",
+    "description": "Tab's Archive First release Dev testing",
+    "version": "0.1.0",
+    "action": {
+        "default_popup": "dashboard.html",
+        "default_icon": "logo thumbnail.png"
+    },
+    "author": {
+        "email": "madhavtrivedi.work17@gmail.com"
+    },
+    "permissions": [
+        "tabs",
+        "windows",
+        "system.memory",
+        "system.cpu"
+    ]
+}
