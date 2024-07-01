@@ -12,6 +12,7 @@
     --fonts-color: #D2DBC8;
     --fonts-color-light: #DFE9D5;
     --scroll-dark-gray: #7C8276;
+    --large-header-font-size: 20px;
     --header-font-size: 18px;
     --sub-header-font-size: 16px;
     --regular-font-size: 14px;
@@ -39,6 +40,11 @@
     font-size: var(--header-font-size);
     font-weight: bold;
 }
+.fs-20 { font-size: var(--large-header-font-size); }
+.fs-b-20 {
+    font-size: var(--large-header-font-size);
+    font-weight: bold;
+}
 
 /* Cursor style */
 .cursor-pointer { cursor: pointer; }
@@ -54,7 +60,7 @@
 /* Custom styling */
 /* Main body */
 .main-frame {
-    width: 500px;
+    width: 700px;
     height: 500px;
 }
 .body-container{
@@ -75,6 +81,41 @@
     border-radius: 5px;
 }
 
+/* Home page styles */
+.home-page-body {
+    display: flex !important;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.home-page-logo img {
+    height: 4rem;
+}
+.more-info-icon {
+    cursor: pointer;
+}
+.btn-outline-custom-style{
+    color: var(--fonts-color);
+    border-color: var(--fonts-color);
+    border-radius: 55px;
+    padding: 7px 15px;
+}
+.btn-outline-custom-style:hover {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    border-color: var(--secondary-color);
+    text-decoration: none;
+}
+.archive-button-div{
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+}
+.archive-button-div .spinner-grow{
+    color: var(--secondary-color);
+}
+
+/* Dashboard styles */
 /* Navigation tabs */
 #window-nav-tabs>.nav-item .nav-link.active {
     color: var(--primary-color);
@@ -86,21 +127,65 @@
 }
 
 /* Open windows table */
-.open-windows-table>table>tbody,
-.archived-windows-table>table>tbody {
+.windows-table table>tbody {
     background-color: var(--fonts-color-light);
 }
-.open-windows-table>table>tbody {
+.windows-table table>tbody {
     height: 100%;
     overflow-y: auto;
 }
-.open-windows-table>table thead th,
-.open-windows-table>table tbody th,
-.open-windows-table>table tbody td{
+.windows-table table thead th,
+.windows-table table tbody th,
+.windows-table table tbody td{
     font-size: var(--regular-font-size);
     font-weight: normal;
+}
+.windows-table .window-action-col {
+    width: 5%;
+}
+.windows-table .window-index-col {
+    width: 5%;
+}
+.windows-table .window-name-col {
+    width: 70%;
+}
+.windows-table .window-tab-count-col {
+    width: 18%;
+}
+.windows-table .window-expand-row-trigger-col {
+    width: 2%;
 }
 
 hr {
     border-top: 1px solid var(--fonts-color);
+}
+.cursor-not-allowed {
+    cursor: not-allowed;
+}
+
+.header-div {
+    position: relative;
+}
+.back-to-index {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin-left: 4%;
+}
+.back-to-index svg {
+    height: 30px;
+    width: 30px;
+    cursor: pointer;
+}
+.back-to-index a {
+    text-decoration: none;
+    color: inherit;
+}
+.back-to-index a:hover, .back-to-index a:focus, .back-to-index a:active {
+    text-decoration: none;
+    color: inherit;
+}
+
+.memory-stats, .windows-table {
+    max-width: 100%;
 }
