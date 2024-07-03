@@ -1,4 +1,5 @@
-import { Browser } from './browser.js'
+import { Browser } from './browser.js';
+import { FILE_CONSTANTS } from './constants.js';
 import { Archive } from './Archive.js';
 
 export class Dashboard {
@@ -14,30 +15,12 @@ export class Dashboard {
         this.currentSelectedArchiveList = [];
         this.archiveTabList = [];
         this.isCurrentTabOpenWindows = true;
-        // this.dashboardConstants = {
-        //     // allWindowClass
-        //     SELECT_ALL_WINDOW_CLASS: ,
-        //     // windowFilterWindowId
-        //     WINDOW_FILTER_WINDOWID: ,
-        //     // windowNotDisabled
-        //     WINDOW_FILTER_ENABLED: ,
-        //     // windowCheckedNotDisabled
-        //     WINDOW_FILTER_CHECKED_ENABLED: ,
-        //     // windowClass
-        //     WINDOW_CLASS: ,
-        //     // tabCheckedNotDisabledFilterWindowId
-        //     TAB_FILTER_CHECKED_ENABLED_WINDOWID: ,
-        //     // tabNotDisabled
-        //     TAB_FILTER_ENABLED: ,
-        //     // tabClass
-        //     TAB_CLASS:
-        // }
     }
 
     async initialize() {
         this.currentOpenWindows = await this.getCurrentOpenWindows();
         this.addEventListeners();
-        this.initializeTable(".open-windows-table ", this.currentOpenWindows);
+        this.initializeTable(FILE_CONSTANTS.DASHBOARD_CLASS.SELECTORS.CLASS_OPEN_TABLE, this.currentOpenWindows);
     }
 
     addEventListeners() {
@@ -50,36 +33,41 @@ export class Dashboard {
         document.getElementById("deleteFromArchive").addEventListener("click", () => { this.deleteFromArchive() });
     }
 
-    tabSwitch(element) {
+    async tabSwitch(element) {
         let currentTabId = element.target.getAttribute("id");
-        console.log(currentTabId)
-        if(currentTabId == "open-windows-tab") {
+        const selectorConstants = FILE_CONSTANTS.DASHBOARD_CLASS.SELECTORS;
+        if(currentTabId == selectorConstants.OPEN_WINDOWS_TAB) {
+            this.currentOpenWindows = await this.getCurrentOpenWindows();
             this.isCurrentTabOpenWindows = true;
-            document.querySelector(".archive-tab-buttons").classList.add("d-none");
-            document.querySelector(".open-tab-buttons").classList.remove("d-none");
-            this.initializeTable(".open-windows-table ", this.currentOpenWindows);
+            document.querySelector(selectorConstants.CLASS_ARCHIVE_TAB_BUTTONS).classList.add("d-none");
+            document.querySelector(selectorConstants.CLASS_OPEN_TAB_BUTTONS).classList.remove("d-none");
+            this.initializeTable(selectorConstants.CLASS_OPEN_TABLE, this.currentOpenWindows);
         }
-        if(currentTabId == "archive-windows-tab") {
+        if(currentTabId == selectorConstants.ARCHIVE_WINDOWS_TAB) {
             this.isCurrentTabOpenWindows = false;
-            document.querySelector(".open-tab-buttons").classList.add("d-none");
-            document.querySelector(".archive-tab-buttons").classList.remove("d-none");
-            this.initializeTable(".archive-windows-table ", this.archiveList);
+            document.querySelector(selectorConstants.CLASS_OPEN_TAB_BUTTONS).classList.add("d-none");
+            document.querySelector(selectorConstants.CLASS_ARCHIVE_TAB_BUTTONS).classList.remove("d-none");
+            this.initializeTable(selectorConstants.CLASS_ARCHIVE_TABLE, this.archiveList);
         }
+    }
+
+    errorLogMessageFormatter(customMessage) {
+        return FILE_CONSTANTS.DASHBOARD_CLASS.LOGGING_MESSAGES.FILE_NAME + ' - ' + customMessage + ' ';
     }
 
     async getCurrentOpenWindows() {
         try {
             return await this.newBrowser.getAllOpenWindows();
         } catch (error) {
-            console.error('Error getting current open browsers: ', error);
+            console.error(this.errorLogMessageFormatter('getCurrentOpenWindows'), error);
             throw error;
         }
 
     }
 
-    storeTabsInList(data, tab, windowId, tabId) {
+    storeTabsInList(data, existingData, tab, windowId, tabId) {
         try{
-            let windowCurrentObj = this.getWindowDetailsFromList(this.currentOpenWindows, windowId);
+            let windowCurrentObj = this.getWindowDetailsFromList(existingData, windowId);
             let windowObj = this.getWindowDetailsFromList(data, windowId);
             let tabCurrentObj = windowCurrentObj.tabs.find(tab => tab.tabId == tabId);
             let tabObject = {
@@ -92,16 +80,16 @@ export class Dashboard {
             if (windowObj) {
                 windowObj.tabs.push(tabObject);
             } else {
-                const windowName = tab.getAttribute("data-window-name")
-                console.log(tab)
+                const windowName = tab.getAttribute("data-window-name");
                 data.push({
                     windowId: windowId,
+                    newWindowId: windowCurrentObj.newWindowId || "",
                     windowName: windowName,
                     tabs: [tabObject]
                 });
             }
         } catch (error) {
-            console.log("dashboard.js - storeTabsInList: ", error)
+            console.error(this.errorLogMessageFormatter('storeTabsInList'), error);
             throw error;
         }
     }
@@ -126,12 +114,12 @@ export class Dashboard {
                 }
             }
         } catch (error) {
-            console.log("Couldn't remove tab from archive list: ", error);
+            console.error(this.errorLogMessageFormatter('removeTabsFromList'), error);
             throw error;
         }
     }
 
-    lookIntoArchive(type, windowObject, tabId = "") {
+    lookIntoArchive(type, windowObject, tabId = "") { 
         try {
             let windowId = windowObject.windowId;
             let windowFromArchive = this.getWindowDetailsFromList(this.archiveList, windowId);
@@ -145,14 +133,15 @@ export class Dashboard {
             }
             return false
         } catch (error) {
-            console.log("LookIntoArchive function error: ", error);
+            console.error(this.errorLogMessageFormatter('lookIntoArchive'), error);
             throw error;
         }
     }
 
     allTabsChecked(parentTable, windowId, tabId) {
-        let checkedTabs = document.querySelectorAll(parentTable + 'input.select-tab-checkbox[data-window-id="' + windowId + '"]:checked:not(:disabled)').length;
-        let parentWindowRow = document.querySelector(parentTable + 'input.select-window-checkbox[data-window-id="' + windowId + '"]');
+        const checkBoxesSelectors = FILE_CONSTANTS.DASHBOARD_CLASS.SELECTORS.CHECKBOXES;
+        let checkedTabs = document.querySelectorAll(parentTable + checkBoxesSelectors.TAB_CHECKED_ENABLED + '[data-window-id="' + windowId + '"]').length;
+        let parentWindowRow = document.querySelector(parentTable + checkBoxesSelectors.WINDOW + '[data-window-id="' + windowId + '"]');
         if (checkedTabs > 0) {
             parentWindowRow.checked = true;
         } else {
@@ -162,13 +151,11 @@ export class Dashboard {
     }
 
     allWindowsChecked(parentTable) {
-        let totalWindows = document.querySelectorAll(parentTable + "input.select-window-checkbox[type='checkbox']:not(:disabled)").length;
-        let checkedWindows = document.querySelectorAll(parentTable + "input.select-window-checkbox[type='checkbox']:checked:not(:disabled)").length;
-        let parentSelectAllWindowRow = document.querySelector(parentTable + 'input.select-all-window-checkbox');
-        let uncheckedTabsCount = document.querySelectorAll(parentTable + 'input.select-tab-checkbox:not(:checked):not(:disabled)').length; // Making sure that all tabs are selected before checking SelectAllWindow checkbox 
-        console.log(uncheckedTabsCount)
-        console.log(totalWindows)
-        console.log(checkedWindows)
+        const checkBoxesSelectors = FILE_CONSTANTS.DASHBOARD_CLASS.SELECTORS.CHECKBOXES; 
+        let totalWindows = document.querySelectorAll(parentTable + checkBoxesSelectors.WINDOW_ENABLED).length;
+        let checkedWindows = document.querySelectorAll(parentTable + checkBoxesSelectors.WINDOW_CHECKED_ENABLED).length;
+        let parentSelectAllWindowRow = document.querySelector(parentTable + checkBoxesSelectors.ALL_WINDOW);
+        let uncheckedTabsCount = document.querySelectorAll(parentTable + checkBoxesSelectors.TAB_NOT_CHECKED_ENABLED).length; // Making sure that all tabs are selected before checking SelectAllWindow checkbox 
         if (totalWindows == checkedWindows && uncheckedTabsCount == 0) {
             parentSelectAllWindowRow.checked = true;
         } else {
@@ -179,21 +166,22 @@ export class Dashboard {
     initializeTabCheckBoxes(parentTable) {
         let windowId = "";
         let tabId = "";
-        document.querySelectorAll(parentTable + '.select-tab-checkbox[type="checkbox"]:not(:disabled)').forEach(tab => {
+        const checkBoxesSelectors = FILE_CONSTANTS.DASHBOARD_CLASS.SELECTORS.CHECKBOXES; 
+        document.querySelectorAll(parentTable + checkBoxesSelectors.TAB_ENABLED).forEach(tab => {
             tab.addEventListener('change', (ele) => {
                 windowId = ele.target.getAttribute("data-window-id")
                 tabId = ele.target.getAttribute("data-tab-id")
                 if(this.isCurrentTabOpenWindows) { // check for only open windows tab
                     if (ele.target.checked) {
-                        this.storeTabsInList(this.archiveList, ele.target, windowId, tabId);
-                        this.storeTabsInList(this.currentSelectedArchiveList, ele.target, windowId, tabId);
+                        this.storeTabsInList(this.archiveList, this.currentOpenWindows, ele.target, windowId, tabId);
+                        this.storeTabsInList(this.currentSelectedArchiveList, this.currentOpenWindows, ele.target, windowId, tabId);
                     } else {
                         this.removeTabsFromList(this.archiveList, windowId, tabId);
                         this.removeTabsFromList(this.currentSelectedArchiveList, windowId, tabId);
                     }
                 } else {
                     if (ele.target.checked) {
-                        this.storeTabsInList(this.archiveTabList, ele.target, windowId, tabId);
+                        this.storeTabsInList(this.archiveTabList, this.archiveList, ele.target, windowId, tabId);
                     } else {
                         this.removeTabsFromList(this.archiveTabList, windowId, tabId);
                     }
@@ -211,21 +199,21 @@ export class Dashboard {
             window.addEventListener('change', (ele) => {
                 windowId = ele.target.getAttribute("data-window-id");
                 const isChecked = ele.target.checked;
-                let allTabsCheckboxes = document.querySelectorAll(parentTable + "input.select-tab-checkbox[data-window-id='" + windowId + "']:not(:disabled)");
+                let allTabsCheckboxes = document.querySelectorAll(parentTable + "input.select-tab-checkbox:not(:disabled)[data-window-id='" + windowId + "']");
                 allTabsCheckboxes.forEach(tab => {
                     tabId = tab.getAttribute("data-tab-id");
                     tab.checked = isChecked;
                     if(this.isCurrentTabOpenWindows) { // check for only open windows tab
                         if (isChecked) {
-                            this.storeTabsInList(this.archiveList, tab, windowId, tabId);
-                            this.storeTabsInList(this.currentSelectedArchiveList, tab, windowId, tabId);
+                            this.storeTabsInList(this.archiveList, this.currentOpenWindows, tab, windowId, tabId);
+                            this.storeTabsInList(this.currentSelectedArchiveList, this.currentOpenWindows, tab, windowId, tabId);
                         } else {
                             this.removeTabsFromList(this.archiveList, windowId, tabId);
                             this.removeTabsFromList(this.currentSelectedArchiveList, windowId, tabId);
                         }
                     } else {
                         if (isChecked) {
-                            this.storeTabsInList(this.archiveTabList, tab, windowId, tabId);
+                            this.storeTabsInList(this.archiveTabList, this.archiveList, tab, windowId, tabId);
                         } else {
                             this.removeTabsFromList(this.archiveTabList, windowId, tabId);
                         }
@@ -256,12 +244,9 @@ export class Dashboard {
         this.initializeTabCheckBoxes(parentTable);
     }
 
-    populateArchiveWindowsTable() {
-        this.populateTableData("archive-windows-table-body", this.archiveList)
-    }
-
     populateTableData(parentTable, tableData) {
-        let parent = parentTable == ".open-windows-table " ? "open" : "archive";
+        const selectorConstants = FILE_CONSTANTS.DASHBOARD_CLASS.SELECTORS;
+        let parent = parentTable == selectorConstants.CLASS_OPEN_TABLE ? "open" : "archive";
         let tableBody = "";
         let windowExistsInArchive = false;
         let tabExistsInArchive = false;
@@ -323,7 +308,7 @@ export class Dashboard {
         }
         // Enables/Disables Select all windows checkbox based on windows/tabs selection
         if (allWindowsExistsInArchive && this.isCurrentTabOpenWindows) { // check for only open windows tab
-            let windowSelectAllCheckbox = document.querySelector(parentTable + '.select-all-window-checkbox');
+            let windowSelectAllCheckbox = document.querySelector(parentTable + selectorConstants.CHECKBOXES.ALL_WINDOW);
             windowSelectAllCheckbox.checked = false
             windowSelectAllCheckbox.classList.add("cursor-not-allowed")
             windowSelectAllCheckbox.setAttribute("disabled", true)
@@ -339,24 +324,26 @@ export class Dashboard {
             await this.archiveObject.clearAllArchives();
             navigateTo('home', this.archiveObject);
         } catch (error) {
-            console.error('Error getting current open browsers: ', error);
+            console.error(this.errorLogMessageFormatter('clearAllArchiveData'), error);
             throw error;
         }
     }
 
     async updateArchive() {
         try {
+            const selectorConstants = FILE_CONSTANTS.DASHBOARD_CLASS.SELECTORS;
             let archiveFormattedData = {
                 archive: this.archiveList
             }
             await this.archiveObject.storeDataInStorage(archiveFormattedData);
             if (this.isCurrentTabOpenWindows) {
-                this.initializeTable(".open-windows-table ", this.currentOpenWindows);
+                this.initializeTable(selectorConstants.CLASS_OPEN_TABLE, this.currentOpenWindows);
             } else {
-                this.initializeTable(".archive-windows-table ", this.archiveList);
+                this.initializeTable(selectorConstants.CLASS_ARCHIVE_TABLE, this.archiveList);
             }
+            // call close selected tabs option
         } catch (error) {
-            console.error('Error updating archive list to chrome storage: ', error);
+            console.error(this.errorLogMessageFormatter('updateArchive'), error);
             throw error;
         }
     }
@@ -370,6 +357,7 @@ export class Dashboard {
 
     async closeSelectedTabs() {
         try {
+            const selectorConstants = FILE_CONSTANTS.DASHBOARD_CLASS.SELECTORS;
             let tabIds = this.currentSelectedArchiveList.flatMap(window => window.tabs.map(tab => parseInt(tab.tabId)));
             if(tabIds) {
                 this.newBrowser.closeSelectedTabs(tabIds)
@@ -377,39 +365,69 @@ export class Dashboard {
                 // Setting timeout for Chrome window to get closed
                 setTimeout(async () => {
                     this.currentOpenWindows = await this.getCurrentOpenWindows();
-                    console.log(this.currentOpenWindows)
-                    this.initializeTable(".open-windows-table ", this.currentOpenWindows);
+                    this.resetAllWindowCheckbox(selectorConstants.CLASS_OPEN_TABLE);
+                    this.initializeTable(selectorConstants.CLASS_OPEN_TABLE, this.currentOpenWindows);
                 }, 100);
             }
         } catch (error) {
-            console.error('dashboard.js - closeSelectedTabs: ', error);
+            console.error(this.errorLogMessageFormatter('closeSelectedTabs'), error);
             throw error;
         }
     }
 
     async openSelectedWindows() {
+        // console.log(this.archiveTabList)
+        // return
         try {
-            let tabUrls = [];
-            this.archiveTabList.forEach(async window => {
-                tabUrls = window.tabs.map(tab => tab.url);
-                await this.newBrowser.createNewWindow(tabUrls);
-            })
+            for (let i = 0; i < this.archiveTabList.length; i++) {
+                const newWindowId = this.archiveTabList[i].newWindowId;
+                const isWindowOpen = await this.checkIfWindowOpen(newWindowId);
+                const tabUrls = this.archiveTabList[i].tabs.map(tab => tab.url);
+                let newWindow = {};
+                if(newWindowId && isWindowOpen) {
+                    tabUrls.forEach(async url => {
+                        await this.newBrowser.openTabsInExistingWindow(newWindowId, url);
+                    })
+                } else {
+                    newWindow = await this.newBrowser.createNewWindow(tabUrls);
+                    this.archiveTabList[i].newWindowId = parseInt(newWindow.id);
+                    this.updateNewWindowIdInArchiveList(this.archiveTabList[i]);
+                }
+            }
             this.deleteFromArchive();
         } catch (error) {
-            console.error('dashboard.js - openSelectedWindows: ', error);
+            console.error(this.errorLogMessageFormatter('openSelectedWindows'), error);
         }
+    }
+
+    async checkIfWindowOpen(windowId) {
+        this.currentOpenWindows = await this.getCurrentOpenWindows()
+        return this.currentOpenWindows.some(obj => obj.windowId == windowId);
+    }
+
+    updateNewWindowIdInArchiveList(window) {
+        this.archiveList.find(obj => obj.windowId == window.windowId).newWindowId = window.newWindowId;
+    }
+
+    // handles select all window checkbox state, as only <tbody> data will get refreshed
+    resetAllWindowCheckbox(parentTable) {
+        const selectorConstants = FILE_CONSTANTS.DASHBOARD_CLASS.SELECTORS;
+        document.querySelector(parentTable + selectorConstants.CHECKBOXES.ALL_WINDOW).checked = false;
     }
 
     deleteFromArchive() {
         try {
+            const selectorConstants = FILE_CONSTANTS.DASHBOARD_CLASS.SELECTORS;
             this.archiveTabList.forEach(window => {
                 window.tabs.forEach(tab => {
                     this.removeTabsFromList(this.archiveList, window.windowId, tab.tabId)
                 })
             });
+            this.archiveTabList = []; // reset archiveTabList after action taken on all selected items from Archive tab
+            this.resetAllWindowCheckbox(selectorConstants.CLASS_ARCHIVE_TABLE);
             this.updateArchive();
         } catch (error) {
-            console.log("dashboard.js - deleteFromArchive", error);
+            console.error(this.errorLogMessageFormatter('deleteFromArchive'), error);
             throw error;
         }
     }

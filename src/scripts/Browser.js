@@ -36,7 +36,7 @@ export class Browser {
 
     async createNewWindow(urls) {
         try {
-            const options = {
+            let options = {
                 url: urls,
                 left: 100,
                 top: 100,
@@ -45,11 +45,39 @@ export class Browser {
                 focused: true,
                 type: 'normal'
             };
-            await chrome.windows.create(options, function(window) {
-                return window;
+            return new Promise((resolve, reject) => {
+                chrome.windows.create(options, function(window) {
+                    if (chrome.runtime.lastError) {
+                        reject(chrome.runtime.lastError);
+                    } else {
+                        console.log("createNewWindow", window);
+                        resolve(window);
+                    }
+                });
             });
         } catch (error) {
             console.log("Browser.js - createNewWindow: ", error);
+        }
+    }
+
+    async openTabsInExistingWindow(windowId, urls) {
+        try {
+            let options = {
+                windowId: parseInt(windowId),
+                url: urls
+            };
+            return new Promise((resolve, reject) => {
+                chrome.tabs.create(options, function(tab) {
+                    if (chrome.runtime.lastError) {
+                        reject(chrome.runtime.lastError);
+                    } else {
+                        console.log("openTabsInExistingWindow", tab);
+                        resolve(tab);
+                    }
+                });
+            });
+        } catch (error) {
+            console.log("Browser.js - openTabsInExistingWindow: ", error);
         }
     }
 }
