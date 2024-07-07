@@ -1,6 +1,8 @@
 export const ARCHIVE_STORAGE_NAME = "archive";
+export const ARCHIVE_LOOKUP_NAME = "windows_name_lookup";
 export const ARCHIVE_INIT_VALUE = {
-    archive: []
+    archive: [],
+    windows_name_lookup: {}
 };
 export const FILE_CONSTANTS = {
     DASHBOARD_CLASS: {

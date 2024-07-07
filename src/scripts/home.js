@@ -20,6 +20,7 @@ export class Home {
 
     async createNewArchive() {
         await this.newArchive.createNewArchive(ARCHIVE_INIT_VALUE);
+        // await this.newArchive.createNewArchive({windows_name_lookup: {}});
         navigateTo('dashboard', this.newArchive);
     }
 }

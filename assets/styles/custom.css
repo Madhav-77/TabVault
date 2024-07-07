@@ -189,3 +189,7 @@ hr {
 .memory-stats, .windows-table {
     max-width: 100%;
 }
+
+.window-name-input {
+    width: 375px;
+}

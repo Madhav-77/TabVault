@@ -11,7 +11,8 @@ export class Dashboard {
         this.currentOpenWindows = null;
         this.archiveObject = archiveObject;
         this.newBrowser = new Browser();
-        this.archiveList = this.archiveObject.archiveList["archive"];
+        this.archiveList = this.archiveObject.archiveData["archive"];
+        this.windowsNameLookup = this.archiveObject.archiveData["windows_name_lookup"];
         this.currentSelectedArchiveList = [];
         this.archiveTabList = [];
         this.isCurrentTabOpenWindows = true;
@@ -27,10 +28,23 @@ export class Dashboard {
         document.querySelectorAll('#window-nav-tabs span[data-bs-toggle="tab"]').forEach(bootstrapTab => { bootstrapTab.addEventListener("click", (element) => { this.tabSwitch(element) }) });
         document.getElementById("clearData").addEventListener("click", () => { this.clearAllArchiveData() });
         document.getElementById("updateArchive").addEventListener("click", () => { this.updateArchive() });
-        document.getElementById("getArchiveList").addEventListener("click", () => { console.log(this.getArchivedWindows()) });
+        document.getElementById("getArchiveList").addEventListener("click", () => { console.log(this.getArchivedData()) });
         document.getElementById("closeSelectedWindows").addEventListener("click", () => { this.closeSelectedTabs() });
         document.getElementById("openFromArchive").addEventListener("click", () => { this.openSelectedWindows() });
         document.getElementById("deleteFromArchive").addEventListener("click", () => { this.deleteFromArchive() });
+        document.getElementById('openModalButton').addEventListener('click', this.openModal);
+        document.querySelectorAll('button[data-dismiss="modal"]').forEach(ele => {ele.addEventListener('click', this.closeModal)});
+    }
+
+    openModal() {
+        const modal = document.getElementById('myModal');
+        const modalToggle = new bootstrap.Modal(modal);
+        modalToggle.show();
+    }
+
+    closeModal() {
+        const modalToggle = bootstrap.Modal.getInstance(document.getElementById('myModal'));
+        modalToggle.hide();
     }
 
     async tabSwitch(element) {
@@ -71,7 +85,7 @@ export class Dashboard {
             let windowObj = this.getWindowDetailsFromList(data, windowId);
             let tabCurrentObj = windowCurrentObj.tabs.find(tab => tab.tabId == tabId);
             let tabObject = {
-                tabId: tabId,
+                tabId: parseInt(tabId),
                 title: tabCurrentObj.title,
                 url: tabCurrentObj.url
             }
@@ -82,7 +96,7 @@ export class Dashboard {
             } else {
                 const windowName = tab.getAttribute("data-window-name");
                 data.push({
-                    windowId: windowId,
+                    windowId: parseInt(windowId),
                     newWindowId: windowCurrentObj.newWindowId || "",
                     windowName: windowName,
                     tabs: [tabObject]
@@ -119,7 +133,7 @@ export class Dashboard {
         }
     }
 
-    lookIntoArchive(type, windowObject, tabId = "") { 
+    lookIntoArchiveList(type, windowObject, tabId = "") { 
         try {
             let windowId = windowObject.windowId;
             let windowFromArchive = this.getWindowDetailsFromList(this.archiveList, windowId);
@@ -133,7 +147,7 @@ export class Dashboard {
             }
             return false
         } catch (error) {
-            console.error(this.errorLogMessageFormatter('lookIntoArchive'), error);
+            console.error(this.errorLogMessageFormatter('lookIntoArchiveList'), error);
             throw error;
         }
     }
@@ -164,13 +178,11 @@ export class Dashboard {
     }
 
     initializeTabCheckBoxes(parentTable) {
-        let windowId = "";
-        let tabId = "";
         const checkBoxesSelectors = FILE_CONSTANTS.DASHBOARD_CLASS.SELECTORS.CHECKBOXES; 
         document.querySelectorAll(parentTable + checkBoxesSelectors.TAB_ENABLED).forEach(tab => {
             tab.addEventListener('change', (ele) => {
-                windowId = ele.target.getAttribute("data-window-id")
-                tabId = ele.target.getAttribute("data-tab-id")
+                const windowId = parseInt(ele.target.getAttribute("data-window-id"))
+                const tabId = parseInt(ele.target.getAttribute("data-tab-id"))
                 if(this.isCurrentTabOpenWindows) { // check for only open windows tab
                     if (ele.target.checked) {
                         this.storeTabsInList(this.archiveList, this.currentOpenWindows, ele.target, windowId, tabId);
@@ -192,16 +204,14 @@ export class Dashboard {
     }
 
     initializeWindowCheckBoxes(parentTable) {
-        let windowId = "";
-        let tabId = "";
         let windowSelectCheckbox = document.querySelectorAll(parentTable + '.select-window-checkbox[type="checkbox"]:not(:disabled)');
         windowSelectCheckbox.forEach(window => {
             window.addEventListener('change', (ele) => {
-                windowId = ele.target.getAttribute("data-window-id");
+                const windowId = parseInt(ele.target.getAttribute("data-window-id"));
                 const isChecked = ele.target.checked;
                 let allTabsCheckboxes = document.querySelectorAll(parentTable + "input.select-tab-checkbox:not(:disabled)[data-window-id='" + windowId + "']");
                 allTabsCheckboxes.forEach(tab => {
-                    tabId = tab.getAttribute("data-tab-id");
+                    const tabId = parseInt(tab.getAttribute("data-tab-id"));
                     tab.checked = isChecked;
                     if(this.isCurrentTabOpenWindows) { // check for only open windows tab
                         if (isChecked) {
@@ -237,11 +247,87 @@ export class Dashboard {
         });
     }
 
-    initializeTable(parentTable, data) {
+    windowNameInputAction(action, currElement) {
+        const windowId = currElement.getAttribute("data-window-id");
+        let windowRow = '';
+        if(currElement.classList.contains("open")) {
+            windowRow = document.querySelector(".open-windows-table .window-row[data-window-id='" + windowId + "']");
+        } else {
+            windowRow = document.querySelector(".archive-windows-table .window-row[data-window-id='" + windowId + "']");
+        }
+        const handleClickOutsideWindowRow = (event) => {
+            if(!windowRow.contains(event.target)) {
+                this.showHideWindowNameEditFields(windowRow, false);
+                document.removeEventListener('click', handleClickOutsideWindowRow);
+            }
+        }
+
+        if(action == "edit") {
+            this.showHideWindowNameEditFields(windowRow, true);
+            document.addEventListener('click', handleClickOutsideWindowRow);
+        } else { // incase of 'save' || 'close'
+            let windowName = currElement.closest(".save-section").querySelector("input.window-name-input").value;
+            if(action == "close" || windowName == "") { // setting input value to initial value if user tried to save the blank field or in case of 'close' 
+                const initialValue = windowRow.querySelector(".window-name-input").getAttribute("data-initial-value");
+                windowRow.querySelector(".window-name-input").value = initialValue;
+            } else {
+                this.windowsNameLookup[windowId] = windowName;
+                console.log(this.windowsNameLookup)
+                if(this.archiveList.find(obj => obj.windowId == windowId)){
+                    this.archiveList.find(obj => obj.windowId == windowId).windowName = windowName;
+                }
+                this.updateArchive();
+            }
+            this.showHideWindowNameEditFields(windowRow, false);
+            document.removeEventListener('click', handleClickOutsideWindowRow);
+        }
+    }
+
+
+    showHideWindowNameEditFields(windowRow, isEditable) {
+        let selectCheckbox = windowRow.querySelector(".select-window-checkbox");
+        let rowExpandTrigger = windowRow.querySelector(".window-expand-row-trigger-col svg");
+        let editButton = windowRow.querySelector(".window-name-col .edit-section");
+        let saveButton = windowRow.querySelector(".window-name-col .save-section");
+        if(isEditable) {
+            selectCheckbox.setAttribute("disabled", true);
+            rowExpandTrigger.classList.add("d-none");
+            editButton.classList.add("d-none");
+            saveButton.classList.remove("d-none");
+        } else {
+            selectCheckbox.removeAttribute("disabled");
+            rowExpandTrigger.classList.remove("d-none");
+            editButton.classList.remove("d-none");
+            saveButton.classList.add("d-none");
+        }
+    }
+
+    async initializeTable(parentTable, data) {
+        // await this.getWindowsNameFromLookup(data);
         this.populateTableData(parentTable, data);
         this.initializeSelectAllWindowCheckBoxes(parentTable);
         this.initializeWindowCheckBoxes(parentTable);
         this.initializeTabCheckBoxes(parentTable);
+        this.initializeWindowNameEditing();
+    }
+
+    initializeWindowNameEditing() {
+        document.querySelectorAll(".edit-window-name-button").forEach(ele => {
+            ele.addEventListener("click", (element) => { this.windowNameInputAction("edit", element.target.closest(".edit-window-name-button")) });
+        });
+        document.querySelectorAll(".save-window-name-button").forEach(ele => {
+            ele.addEventListener("click", (element) => { this.windowNameInputAction("save", element.target.closest(".save-window-name-button")) });
+        });
+        document.querySelectorAll(".close-window-name-edit-button").forEach(ele => {
+            ele.addEventListener("click", (element) => { this.windowNameInputAction("close", element.target.closest(".close-window-name-edit-button")) });
+        });
+    }
+
+    getWindowsNameFromLookup(windowId, windowName) {
+        if(this.windowsNameLookup && this.windowsNameLookup.hasOwnProperty(windowId)){
+            return this.windowsNameLookup[windowId];
+        }
+        return windowName;
     }
 
     populateTableData(parentTable, tableData) {
@@ -253,21 +339,42 @@ export class Dashboard {
         let allWindowsExistsInArchive = true;
         for (let i = 0; i < tableData.length; i++) {
             if(this.isCurrentTabOpenWindows){ // check for only open windows tab
-                windowExistsInArchive = this.lookIntoArchive("window", tableData[i])
+                windowExistsInArchive = this.lookIntoArchiveList("window", tableData[i])
                 if (!windowExistsInArchive) {
                     allWindowsExistsInArchive = false;
                 }
             }
+            let windowName = this.getWindowsNameFromLookup(tableData[i].windowId, `Window ${i + 1}`)
+            console.log(windowName)
             tableBody += `
-                    <tr class="" aria-expanded="false" data-window-id=${tableData[i].windowId} data-all-tabs-checked="false">
+                    <tr class="window-row" aria-expanded="false" data-window-id=${tableData[i].windowId}>
                         <th class="window-action-col" scope="row">
                             <input class="select-window-checkbox ${windowExistsInArchive ? 'cursor-not-allowed' : ''}" data-type="window" data-window-id=${tableData[i].windowId} ${windowExistsInArchive ? 'disabled title="Already archived"' : ''} type="checkbox">
                         </th>
                         <td class="window-index-col">${i + 1}</td>
-                        <td class="window-name-col">Window ${i + 1} ${tableData[i].focused ? '<span class="focused-window-text">(Active window)</span>' : ''}</td>
+                        <td class="window-name-col">
+                            
+                            ${windowExistsInArchive ? `<span>${windowName} ${tableData[i].focused ? '<span class="focused-window-text">(Active window)</span>' : ''}</span>` : `
+                                <span class="edit-section">
+                                    <span>${windowName} ${tableData[i].focused ? '<span class="focused-window-text">(Active window)</span>' : ''}</span>
+                                    <span class="edit-window-name-button float-right cursor-pointer ${parent}" data-window-id=${tableData[i].windowId}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" width="16" height="16"><path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Zm.176 4.823L9.75 4.81l-6.286 6.287a.253.253 0 0 0-.064.108l-.558 1.953 1.953-.558a.253.253 0 0 0 .108-.064Zm1.238-3.763a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354Z"></path></svg>
+                                    </span>
+                                </span>
+                                <span class="save-section d-none">
+                                    <input class="form-control window-name-input form-control-sm float-left" value="${windowName}" data-initial-value="${windowName}" type="text">
+                                    <span class="save-window-name-button float-right cursor-pointer ${parent}" data-window-id=${tableData[i].windowId}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" width="16" height="16"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path></svg>
+                                    </span>
+                                    <span class="close-window-name-edit-button float-right cursor-pointer ${parent}" data-window-id=${tableData[i].windowId}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" width="16" height="16"><path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"></path></svg>
+                                    </span>
+                                </span>
+                            `}
+                        </td>
                         <td class="window-tab-count-col text-center">${tableData[i].tabs.length}</td>
                         <td class="window-expand-row-trigger-col text-center toggle-btn cursor-pointer" data-target="#${parent}-tab-details-${tableData[i].windowId}">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" width="16" height="16">
                                 <path d="M12.78 5.22a.749.749 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.06 0L3.22 6.28a.749.749 0 1 1 1.06-1.06L8 8.939l3.72-3.719a.749.749 0 0 1 1.06 0Z"></path>
                             </svg>
                         </td>
@@ -286,11 +393,11 @@ export class Dashboard {
                                     <tbody>
                                         ${tableData[i].tabs.map((tab, j) => {
                                             if(this.isCurrentTabOpenWindows){ // check for only open windows tab
-                                                tabExistsInArchive = this.lookIntoArchive("tab", tableData[i], tab.tabId);
+                                                tabExistsInArchive = this.lookIntoArchiveList("tab", tableData[i], tab.tabId);
                                             }
-                                            return `<tr data-tab-id=${tab.tabId}>
+                                            return `<tr class="tab-row" data-tab-id=${tab.tabId}>
                                                 <th class="tab-action-col" scope="row">
-                                                    <input class="select-tab-checkbox ${tabExistsInArchive ? 'cursor-not-allowed' : ''}" data-window-id=${tableData[i].windowId} data-window-name="Window ${i + 1}" data-type="tab" data-tab-id=${tab.tabId} ${tabExistsInArchive ? 'disabled title="Already archived"' : ''} type="checkbox">
+                                                    <input class="select-tab-checkbox ${tabExistsInArchive ? 'cursor-not-allowed' : ''}" data-window-id=${tableData[i].windowId} data-window-name="${windowName}" data-type="tab" data-tab-id=${tab.tabId} ${tabExistsInArchive ? 'disabled title="Already archived"' : ''} type="checkbox">
                                                 </th>
                                                 <td class="tab-index-col">${j + 1}</td>
                                                 <td class="tab-title-col">
@@ -321,7 +428,7 @@ export class Dashboard {
 
     async clearAllArchiveData() {
         try {
-            await this.archiveObject.clearAllArchives();
+            await this.archiveObject.clearAllData();
             navigateTo('home', this.archiveObject);
         } catch (error) {
             console.error(this.errorLogMessageFormatter('clearAllArchiveData'), error);
@@ -332,8 +439,10 @@ export class Dashboard {
     async updateArchive() {
         try {
             const selectorConstants = FILE_CONSTANTS.DASHBOARD_CLASS.SELECTORS;
+            this.cleanWindowsLookup();
             let archiveFormattedData = {
-                archive: this.archiveList
+                archive: this.archiveList,
+                windows_name_lookup: this.windowsNameLookup
             }
             await this.archiveObject.storeDataInStorage(archiveFormattedData);
             if (this.isCurrentTabOpenWindows) {
@@ -348,11 +457,27 @@ export class Dashboard {
         }
     }
 
-    getArchivedWindows() {
+    cleanWindowsLookup() {
+        try {
+            const currentOpenWindowsList = this.currentOpenWindows.map(obj => obj.windowId);
+            const archiveWindowsList = this.archiveList.map(obj => obj.windowId);
+            const allWindows = currentOpenWindowsList.concat(archiveWindowsList);
+            const allLookUpKeys = Object.keys(this.windowsNameLookup).map(key => parseInt(key));;
+            allLookUpKeys.forEach(window => {
+                if(!allWindows.includes(window)) {
+                    delete this.windowsNameLookup[window]
+                }
+            })
+        } catch (error) {
+            console.error(this.errorLogMessageFormatter('cleanWindowsLookup'), error);
+        }
+    }
+
+    getArchivedData() {
         // console.log(this.archiveTabList)
         // console.log(this.archiveList)
         // console.log(this.currentSelectedArchiveList;)
-        return this.archiveObject.archiveList;
+        return this.archiveObject.archiveData;
     }
 
     async closeSelectedTabs() {
@@ -472,6 +597,12 @@ export class Dashboard {
         //         }
         //     });
         // });
+    }
+}
+
+{
+    window_name_lookup: {
+        windowId: "windowName"
     }
 }
 

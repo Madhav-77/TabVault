@@ -1,12 +1,12 @@
 import { ChromeLocalStorageService } from '../services/ChromeLocalStorageService.js';
-import { ARCHIVE_STORAGE_NAME } from './constants.js';
+import { ARCHIVE_STORAGE_NAME, ARCHIVE_LOOKUP_NAME } from './constants.js';
 
 export class Archive {
     constructor(archiveName) {
         if (Archive.instance instanceof Archive) {
             return Archive.instance
         }
-        this.archiveList = null;
+        this.archiveData = null;
         this._archiveName = archiveName;
     }
 
@@ -16,9 +16,9 @@ export class Archive {
      */
     async doesArchiveExist() {
         try {
-            await this.fetchDataFromStorage(this._archiveName);
-            console.log(this.archiveList)
-            return this.archiveList && this.archiveList.hasOwnProperty(ARCHIVE_STORAGE_NAME);
+            await this.fetchDataFromStorage();
+            console.log("fetchDataFromStorage",this.archiveData)
+            return this.archiveData && this.archiveData.hasOwnProperty(ARCHIVE_STORAGE_NAME) && this.archiveData.hasOwnProperty(ARCHIVE_LOOKUP_NAME);
         } catch (error) {
             console.error('Error checking if archive exists:', error);
             return false;
@@ -30,15 +30,15 @@ export class Archive {
     //  * @returns {Array|null}
     //  */
     // getArchiveList() {
-    //     return this.archiveList;
+    //     return this.archiveData;
     // }
 
     // /**
-    //  * Fetches the archive list from storage and sets it to archiveList property.
+    //  * Fetches the archive list from storage and sets it to archiveData property.
     //  */
     // async setArchiveList() {
     //     try {
-    //         this.archiveList = await this.fetchDataFromStorage(this._archiveName);
+    //         this.archiveData = await this.fetchDataFromStorage(this._archiveName);
     //     } catch (error) {
     //         console.error('Error setting archive list: ', error);
     //         throw error;
@@ -63,7 +63,7 @@ export class Archive {
     async fetchDataFromStorage(key) {
         try {
             const data = await ChromeLocalStorageService.getValueChromeLocalStorage(key);
-            this.archiveList = data;
+            this.archiveData = data;
             console.log('Fetched archive data:', data);
             return data || []; // Return an empty array if data is falsy
         } catch (error) {
@@ -78,7 +78,7 @@ export class Archive {
      */
     async storeDataInStorage(archiveData) {
         try {
-            this.archiveList = await ChromeLocalStorageService.setValueChromeLocalStorage(archiveData);
+            this.archiveData = await ChromeLocalStorageService.setValueChromeLocalStorage(archiveData);
             console.log('Archive data stored successfully:', archiveData);
         } catch (error) {
             console.error('Error getting archive from storage: ', error);
@@ -92,8 +92,8 @@ export class Archive {
      */
     async createNewArchive(initialValue) {
         try {
-            this.archiveList = await ChromeLocalStorageService.setValueChromeLocalStorage(initialValue);
-            console.log("New archive created: ", this.archiveList);
+            this.archiveData = await ChromeLocalStorageService.setValueChromeLocalStorage(initialValue);
+            console.log("New archive created: ", this.archiveData);
             // window.location.href = "dashboard.html";
         } catch (error) {
             console.error('Error creating new archive: ', error);
@@ -106,7 +106,7 @@ export class Archive {
      */
     async removeKeyFromArchive(key) {
         try {
-            this.archiveList = await ChromeLocalStorageService.removeKeyChromeLocalStorage(key);
+            this.archiveData = await ChromeLocalStorageService.removeKeyChromeLocalStorage(key);
         } catch (error) {
             console.error(`Error removing key from archive: `, error);
             throw error;
@@ -114,13 +114,13 @@ export class Archive {
     }
 
     /**
-     * Clears all archives from Chrome local storage.
+     * Clears all data from Chrome local storage.
      */
-    async clearAllArchives() {
+    async clearAllData() {
         try {
             ChromeLocalStorageService.clearChromeLocalStorage();
-            this.archiveList = null;
-            console.log('All archives cleared successfully');
+            this.archiveData = null;
+            console.log('All data cleared successfully');
         } catch (error) {
             console.error('Error clearing all archives: ', error);
             throw error;
