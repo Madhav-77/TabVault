@@ -32,19 +32,7 @@ export class Dashboard {
         document.getElementById("closeSelectedWindows").addEventListener("click", () => { this.closeSelectedTabs() });
         document.getElementById("openFromArchive").addEventListener("click", () => { this.openSelectedWindows() });
         document.getElementById("deleteFromArchive").addEventListener("click", () => { this.deleteFromArchive() });
-        document.getElementById('openModalButton').addEventListener('click', this.openModal);
         document.querySelectorAll('button[data-dismiss="modal"]').forEach(ele => {ele.addEventListener('click', this.closeModal)});
-    }
-
-    openModal() {
-        const modal = document.getElementById('myModal');
-        const modalToggle = new bootstrap.Modal(modal);
-        modalToggle.show();
-    }
-
-    closeModal() {
-        const modalToggle = bootstrap.Modal.getInstance(document.getElementById('myModal'));
-        modalToggle.hide();
     }
 
     async tabSwitch(element) {
