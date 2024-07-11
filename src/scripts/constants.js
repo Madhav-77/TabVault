@@ -1,13 +1,11 @@
-export const ARCHIVE_STORAGE_NAME = "archive";
-export const ARCHIVE_LOOKUP_NAME = "windows_name_lookup";
+export const ARCHIVE_LIST_NAME = "archive";
+export const ARCHIVE_WINDOW_LOOKUP_NAME = "windows_name_lookup";
 export const ARCHIVE_INIT_VALUE = {
     archive: [],
     windows_name_lookup: {}
 };
 export const FILE_CONSTANTS = {
     DASHBOARD_CLASS: {
-        OPEN_NAME: "open",
-        ARCHIVE_NAME: "archive",
         SELECTORS: {
             OPEN_WINDOWS_TAB: "open-windows-tab",
             CLASS_OPEN_TAB_BUTTONS: ".open-tab-buttons",
@@ -15,6 +13,8 @@ export const FILE_CONSTANTS = {
             ARCHIVE_WINDOWS_TAB: "archive-windows-tab",
             CLASS_ARCHIVE_TAB_BUTTONS: ".archive-tab-buttons",
             CLASS_ARCHIVE_TABLE: ".archive-windows-table ", // archive windows tab div, space at end should not be removed
+            DATA_WINDOW_ID: "data-window-id",
+            DATA_TAB_ID: "data-tab-id",
 
             CHECKBOXES: {
                 ALL_WINDOW: "input.select-all-window-checkbox[type='checkbox']", // all window checkbox query selector
@@ -31,6 +31,29 @@ export const FILE_CONSTANTS = {
         LOGGING_MESSAGES: {
             FILE_NAME: "dashboard.js"
         },
-        TITLE_MESSAGES: {}
+        TITLE_MESSAGES: {
+            ALREADY_ARCHIVED: "Already archived",
+            CHECKBOX_DISABLE_WINDOW_NAME_EDIT: "Close or Save window name"
+        }
+    },
+    ARCHIVE_CLASS: {
+        LOGGING_MESSAGES: {
+            FILE_NAME: "Archive.js"
+        },
+    },
+    HOME_CLASS: {
+        LOGGING_MESSAGES: {
+            FILE_NAME: "Home.js"
+        },
+    },
+    BROWSER_CLASS: {
+        LOGGING_MESSAGES: {
+            FILE_NAME: "Browser.js"
+        },
+    },
+    INDEX_SCRIPT: {
+        LOGGING_MESSAGES: {
+            FILE_NAME: "Index.js"
+        }
     }
 }

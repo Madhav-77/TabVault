@@ -1,6 +1,12 @@
+import { FILE_CONSTANTS } from "./constants.js";
+
 export class Browser {
     constructor() {}
 
+    /**
+     * Fetches all open chrome windows.
+     * @returns {Array} - List of chrome windows []
+     */
     async getAllOpenWindows() {
         try {
             const windows = await chrome.windows.getAll({ populate: true });
@@ -20,23 +26,32 @@ export class Browser {
             });
             return allWindows;
         } catch (error) {
-            console.log("Browser.js - getAllOpenWindows: ", error);
+            // console.error(this.errorLogMessageFormatter('getAllOpenWindows'), error);
             throw error;
         }
     }
 
+    /**
+     * Closes chrome tabs
+     * @param {Array} tabIds - Tab ids needs to be passed
+     */
     async closeSelectedTabs(tabIds) {
         try {
             await chrome.tabs.remove(tabIds);
         } catch (error) {
-            console.log("Browser.js - closeSelectedTabs: ", error);
+            // console.error(this.errorLogMessageFormatter('closeSelectedTabs'), error);
             throw error;
         }
     }
 
+    /**
+     * Creates new windows with single/multiple tabs
+     * @param {Array} urls - Tab URLs needs to be passed
+     * @returns {Promise} - Resolves with data about last opened chrome window instance.
+     */
     async createNewWindow(urls) {
         try {
-            let options = {
+            const options = {
                 url: urls,
                 left: 100,
                 top: 100,
@@ -50,19 +65,25 @@ export class Browser {
                     if (chrome.runtime.lastError) {
                         reject(chrome.runtime.lastError);
                     } else {
-                        console.log("createNewWindow", window);
                         resolve(window);
                     }
                 });
             });
         } catch (error) {
-            console.log("Browser.js - createNewWindow: ", error);
+            // console.error(this.errorLogMessageFormatter('createNewWindow'), error);
+            throw error;
         }
     }
 
+    /**
+     * Opens single/multiple tab in already opened window
+     * @param {String} windowId - Target Window Id
+     * @param {Array} urls - Tab URLs
+     * @returns {Promise} - Resolves with data about last opened chrome tab instance.
+     */
     async openTabsInExistingWindow(windowId, urls) {
         try {
-            let options = {
+            const options = {
                 windowId: parseInt(windowId),
                 url: urls
             };
@@ -71,13 +92,17 @@ export class Browser {
                     if (chrome.runtime.lastError) {
                         reject(chrome.runtime.lastError);
                     } else {
-                        console.log("openTabsInExistingWindow", tab);
                         resolve(tab);
                     }
                 });
             });
         } catch (error) {
-            console.log("Browser.js - openTabsInExistingWindow: ", error);
+            // console.error(this.errorLogMessageFormatter('openTabsInExistingWindow'), error);
+            throw error;
         }
+    }
+    
+    errorLogMessageFormatter(customMessage) {
+        return FILE_CONSTANTS.BROWSER_CLASS.LOGGING_MESSAGES.FILE_NAME + ' - ' + customMessage + ' ';
     }
 }
