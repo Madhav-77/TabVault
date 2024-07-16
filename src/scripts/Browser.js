@@ -1,7 +1,10 @@
 import { FILE_CONSTANTS } from "./constants.js";
+import { errorLogMessageFormatter } from "./sharedUtility.js";
 
 export class Browser {
-    constructor() {}
+    constructor() {
+        this.loggingMessages = FILE_CONSTANTS.BROWSER_CLASS.LOGGING_MESSAGES;
+    }
 
     /**
      * Fetches all open chrome windows.
@@ -26,7 +29,7 @@ export class Browser {
             });
             return allWindows;
         } catch (error) {
-            // console.error(this.errorLogMessageFormatter('getAllOpenWindows'), error);
+            console.error(errorLogMessageFormatter(this.loggingMessages.FILE_NAME, 'getAllOpenWindows'), error);
             throw error;
         }
     }
@@ -39,7 +42,7 @@ export class Browser {
         try {
             await chrome.tabs.remove(tabIds);
         } catch (error) {
-            // console.error(this.errorLogMessageFormatter('closeSelectedTabs'), error);
+            // console.error(errorLogMessageFormatter(this.loggingMessages.FILE_NAME, 'closeSelectedTabs'), error);
             throw error;
         }
     }
@@ -70,7 +73,7 @@ export class Browser {
                 });
             });
         } catch (error) {
-            // console.error(this.errorLogMessageFormatter('createNewWindow'), error);
+            // console.error(errorLogMessageFormatter(this.loggingMessages.FILE_NAME, 'createNewWindow'), error);
             throw error;
         }
     }
@@ -97,7 +100,7 @@ export class Browser {
                 });
             });
         } catch (error) {
-            // console.error(this.errorLogMessageFormatter('openTabsInExistingWindow'), error);
+            // console.error(errorLogMessageFormatter(this.loggingMessages.FILE_NAME, 'openTabsInExistingWindow'), error);
             throw error;
         }
     }

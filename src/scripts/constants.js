@@ -6,6 +6,7 @@ export const ARCHIVE_INIT_VALUE = {
 };
 export const FILE_CONSTANTS = {
     DASHBOARD_CLASS: {
+        TABS: ["open", "archive"],
         SELECTORS: {
             OPEN_WINDOWS_TAB: "open-windows-tab",
             CLASS_OPEN_TAB_BUTTONS: ".open-tab-buttons",
@@ -29,17 +30,27 @@ export const FILE_CONSTANTS = {
             }
         },
         LOGGING_MESSAGES: {
-            FILE_NAME: "dashboard.js"
+            FILE_NAME: "Dashboard.js"
         },
         TITLE_MESSAGES: {
             ALREADY_ARCHIVED: "Already archived",
             CHECKBOX_DISABLE_WINDOW_NAME_EDIT: "Close or Save window name"
+        },
+        POPUP_MESSAGES: {
+            NO_SELECTION: "Please select at least 1 window/tab.",
+            CLOSE_WINDOWS: "Are you sure you want to close selected windows/tabs without storing in archive?",
+            ARCHIVE_CLOSE_WINDOWS: "This will store selected windows/tabs in archive and close it. Press Ok to continue.",
+            DELETE_ARCHIVE: "Are you sure you want to Delete selected windows/tabs from archive? This action cannot be reversed.",
+            DELETE_ALL_ARCHIVE: "This will clear all the stored data, and action cannot be reversed. Press Ok to continue.",
         }
     },
     ARCHIVE_CLASS: {
         LOGGING_MESSAGES: {
             FILE_NAME: "Archive.js"
         },
+        FAILURE_MESSAGE: {
+            SOMETHING_WENT_WRONG: "Something went wrong. Close and open the extension again or you can delete the archive."
+        }
     },
     HOME_CLASS: {
         LOGGING_MESSAGES: {

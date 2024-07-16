@@ -1,0 +1,33 @@
+/* Home page styles */
+.home-page-body {
+    display: flex !important;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.home-page-logo img {
+    height: 4rem;
+}
+.more-info-icon {
+    cursor: pointer;
+}
+.btn-outline-custom-style{
+    color: var(--fonts-color);
+    border-color: var(--fonts-color);
+    border-radius: 55px;
+    padding: 7px 15px;
+}
+.btn-outline-custom-style:hover {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    border-color: var(--secondary-color);
+    text-decoration: none;
+}
+.archive-button-div{
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+}
+.archive-button-div .spinner-grow{
+    color: var(--secondary-color);
+}

@@ -1,5 +1,6 @@
 import { ChromeLocalStorageService } from '../services/ChromeLocalStorageService.js';
 import { FILE_CONSTANTS } from './constants.js';
+import { errorLogMessageFormatter } from './sharedUtility.js';
 
 export class Archive {
     constructor(archiveName, archiveLookupName) {
@@ -9,6 +10,8 @@ export class Archive {
         this.archiveData = null;
         this._archiveName = archiveName;
         this._archiveLookupName = archiveLookupName;
+        this.loggingMessages = FILE_CONSTANTS.ARCHIVE_CLASS.LOGGING_MESSAGES;
+        this.failureMessages = FILE_CONSTANTS.ARCHIVE_CLASS.FAILURE_MESSAGE;
     }
 
     /**
@@ -21,7 +24,7 @@ export class Archive {
             // console.log("fetchDataFromStorage", archiveData)
             return archiveData && archiveData.hasOwnProperty(this._archiveName) && archiveData.hasOwnProperty(this._archiveLookupName);
         } catch (error) {
-            // console.error(this.errorLogMessageFormatter('doesArchiveListExist'), error);
+            // console.error(errorLogMessageFormatter(this.loggingMessages.FILE_NAME, 'doesArchiveListExist'), error);
             throw error;
         }
     }
@@ -37,7 +40,7 @@ export class Archive {
             // console.log('Fetched archive data:', this.archiveData);
             return this.archiveData || []; // Return an empty array if data is falsy
         } catch (error) {
-            // console.error(this.errorLogMessageFormatter('fetchDataFromStorage'), error);
+            // console.error(errorLogMessageFormatter(this.loggingMessages.FILE_NAME, 'fetchDataFromStorage'), error);
             throw error;
         }
     }
@@ -48,11 +51,15 @@ export class Archive {
      */
     async storeDataInStorage(data) {
         try {
-            await ChromeLocalStorageService.setValueChromeLocalStorage(data);
-            this.fetchDataFromStorage();
+            if(await ChromeLocalStorageService.setValueChromeLocalStorage(data)) {
+                await this.fetchDataFromStorage();
+                return { success: true, message: "" };
+            } else {
+                return { success: false, message: this.failureMessages.SOMETHING_WENT_WRONG };
+            }
             // console.log('Archive data stored successfully:', archiveData);
         } catch (error) {
-            // console.error(this.errorLogMessageFormatter('storeDataInStorage'), error);
+            // console.error(errorLogMessageFormatter(this.loggingMessages.FILE_NAME, 'storeDataInStorage'), error);
             throw error;
         }
     }
@@ -66,12 +73,8 @@ export class Archive {
             this.archiveData = null;
             // console.log('All data cleared successfully');
         } catch (error) {
-            // console.error(this.errorLogMessageFormatter('clearAllData'), error);
+            // console.error(errorLogMessageFormatter(this.loggingMessages.FILE_NAME, 'clearAllData'), error);
             throw error;
         }
-    }
-
-    errorLogMessageFormatter(customMessage) {
-        return FILE_CONSTANTS.ARCHIVE_CLASS.LOGGING_MESSAGES.FILE_NAME + ' - ' + customMessage + ' ';
     }
 }

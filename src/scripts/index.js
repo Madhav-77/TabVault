@@ -1,8 +1,10 @@
 import { ARCHIVE_LIST_NAME, ARCHIVE_WINDOW_LOOKUP_NAME, FILE_CONSTANTS } from './constants.js';
 import { Archive } from './Archive.js';
+import { errorLogMessageFormatter } from './sharedUtility.js';
 
 document.addEventListener('DOMContentLoaded', async() => {
     checkForArchive(); // checks if data exists in archive for initial redirection
+    const loggingMessages = FILE_CONSTANTS.INDEX_SCRIPT.LOGGING_MESSAGES;
 
     window.navigateTo = function(page, archive) {
         loadPage(page, archive);
@@ -12,6 +14,7 @@ document.addEventListener('DOMContentLoaded', async() => {
         try {
             const htmlPath = `${page}.html`;
             const jsPath = `../scripts/${page}.js`;
+            const cssPath = `../../assets/styles/${page}.css`;
             const response = await fetch(htmlPath);
             const html = await response.text();
             document.getElementsByClassName("html-dynamic-page-viewer")[0].innerHTML = html;
@@ -22,30 +25,43 @@ document.addEventListener('DOMContentLoaded', async() => {
                 document.head.removeChild(oldScript);
             }
 
-            loadScript(jsPath, () => { initializePage(page, archive); }); // Load the new script
+            // Remove the previously added style if it exists
+            const oldStyle = document.getElementById('pageStyle');
+            if (oldStyle) {
+                document.head.removeChild(oldStyle);
+            }
+
+            loadScript(jsPath, cssPath, () => { initializePage(page, archive); }); // Load the new script
         } catch (error) {
-            // console.error(this.errorLogMessageFormatter('loadPage'), error);
+            // console.error(errorLogMessageFormatter(loggingMessages.FILE_NAME, 'loadPage'), error);
             throw error;
         }
     }
 
-    function loadScript(url, callback) {
+    function loadScript(jsUrl, cssUrl, callback) {
         const script = document.createElement('script');
-        script.src = url;
+        const style = document.createElement('link');
+        script.src = jsUrl;
         script.type = "module";
         script.id = 'pageScript';
+        
+        style.href = cssUrl;
+        style.rel = 'stylesheet';
+        style.id = 'pageStyle';
+        
         script.onload = callback;
         document.head.appendChild(script);
+        document.head.appendChild(style);
     }
 
     async function initializePage(page, archive) {
         switch (page) {
             case 'home':
-                const { Home } = await import ('./home.js');
+                const { Home } = await import ('./Home.js');
                 new Home(archive).initialize();
                 break;
             case 'dashboard':
-                const { Dashboard } = await import ('./dashboard.js');
+                const { Dashboard } = await import ('./Dashboard.js');
                 new Dashboard(archive).initialize();
                 break;
         }
@@ -60,12 +76,8 @@ document.addEventListener('DOMContentLoaded', async() => {
                 await navigateTo('home', newArchive);
             }
         }).catch(error => {
-            // console.error(this.errorLogMessageFormatter('checkForArchive'), error);
+            // console.error(errorLogMessageFormatter(loggingMessages.FILE_NAME, 'checkForArchive'), error);
             throw error;
         });
-    }
-
-    function errorLogMessageFormatter(customMessage) {
-        return FILE_CONSTANTS.INDEX_SCRIPT.LOGGING_MESSAGES.FILE_NAME + ' - ' + customMessage + ' ';
     }
 });

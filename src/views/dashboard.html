@@ -1,4 +1,4 @@
-<div class="dashboard-page-body">
+<div class="dashboard-page d-flex h-100">
     <header class="secondary-color-bg light-color-bg">
         <div class="header-div">
             <div class="back-to-index">
@@ -15,7 +15,7 @@
             </center>
         </div>
     </header>
-    <div class="m-3">
+    <div class="m-3 dashboard-page-body d-flex">
         <div class="memory-stats container p-0">
             <div class="row">
                 <div class="col-4 fs-14">
@@ -30,7 +30,10 @@
             </div>
         </div>
         <hr class="fonts-color-font">
-        <div class="windows-table container p-0">
+        <div class="spinner-div d-none">
+            <span class="spinner-grow"></span>
+        </div>
+        <div class="windows-table container p-0 spinner-invert-class">
             <ul class="nav nav-tabs" id="window-nav-tabs" role="tablist">
                 <li class="nav-item">
                     <span class="nav-link active fs-16 cursor-pointer" id="open-windows-tab" data-bs-toggle="tab" href="#open-windows" role="tab" aria-controls="open-windows" aria-selected="true">
@@ -102,12 +105,4 @@
             </div>
         </div>
     </div>
-    <!-- <div>
-        <button id="close-current-window">Close Current Window</button>
-    </div> -->
 </div>
-<!-- <script type="module" defer src="../scripts/dashboard.js"></script>
-<script src="../../assets/scripts/bootstrap.bundle.min.js"></script>
-</body>
-
-</html> -->

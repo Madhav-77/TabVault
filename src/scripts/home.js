@@ -1,4 +1,5 @@
 import { FILE_CONSTANTS, ARCHIVE_INIT_VALUE } from './constants.js';
+import { errorLogMessageFormatter } from './sharedUtility.js';
 
 export class Home {
     constructor(archive) {
@@ -6,6 +7,7 @@ export class Home {
             return Home.instance
         }
         this.archive = archive;
+        this.loggingMessages = FILE_CONSTANTS.HOME_CLASS.LOGGING_MESSAGES;
     }
 
     initialize() {
@@ -22,12 +24,8 @@ export class Home {
             await this.archive.storeDataInStorage(ARCHIVE_INIT_VALUE);
             navigateTo('dashboard', this.archive);
         } catch (error) {
-            // console.error(this.errorLogMessageFormatter('createNewArchive'), error);
+            // console.error(errorLogMessageFormatter(this.loggingMessages.FILE_NAME, 'createNewArchive'), error);
             throw error;
         }
-    }
-    
-    errorLogMessageFormatter(customMessage) {
-        return FILE_CONSTANTS.HOME_CLASS.LOGGING_MESSAGES.FILE_NAME + ' - ' + customMessage + ' ';
     }
 }
