@@ -56,6 +56,27 @@
     width: 2%;
 }
 
+.windows-table .tab-action-col {
+    width: 5%;
+}
+.windows-table .tab-index-col {
+    width: 5%;
+}
+.windows-table .open-windows-table .tab-title-col {
+    width: 85%;
+}
+.windows-table .archive-windows-table .tab-title-col {
+    width: 90%;
+}
+.windows-table .open-windows-table .tab-redirect-col {
+    width: 5%;
+}
+
+.windows-table tr.window-row.focused, 
+.windows-table tr.tab-row.active {
+    background-color: #c8ce8e;
+}
+
 hr {
     border-top: 1px solid var(--fonts-color);
     width: 100%;

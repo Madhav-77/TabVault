@@ -1,5 +1,6 @@
 import { FILE_CONSTANTS } from "./constants.js";
 import { errorLogMessageFormatter } from "./sharedUtility.js";
+import { ChromeWindowTabService } from "../services/ChromeWindowTabService.js";
 
 export class Browser {
     constructor() {
@@ -12,7 +13,7 @@ export class Browser {
      */
     async getAllOpenWindows() {
         try {
-            const windows = await chrome.windows.getAll({ populate: true });
+            const windows = await ChromeWindowTabService.getAllOpenWindows();
             const allWindows = windows.map(window => {
                 return {
                     windowId: window.id,
@@ -40,7 +41,7 @@ export class Browser {
      */
     async closeSelectedTabs(tabIds) {
         try {
-            await chrome.tabs.remove(tabIds);
+            await ChromeWindowTabService.closeTabsByTabId(tabIds);
         } catch (error) {
             // console.error(errorLogMessageFormatter(this.loggingMessages.FILE_NAME, 'closeSelectedTabs'), error);
             throw error;
@@ -63,15 +64,7 @@ export class Browser {
                 focused: true,
                 type: 'normal'
             };
-            return new Promise((resolve, reject) => {
-                chrome.windows.create(options, function(window) {
-                    if (chrome.runtime.lastError) {
-                        reject(chrome.runtime.lastError);
-                    } else {
-                        resolve(window);
-                    }
-                });
-            });
+            return await ChromeWindowTabService.createNewWindowWithURLs(options);
         } catch (error) {
             // console.error(errorLogMessageFormatter(this.loggingMessages.FILE_NAME, 'createNewWindow'), error);
             throw error;
@@ -90,22 +83,32 @@ export class Browser {
                 windowId: parseInt(windowId),
                 url: urls
             };
-            return new Promise((resolve, reject) => {
-                chrome.tabs.create(options, function(tab) {
-                    if (chrome.runtime.lastError) {
-                        reject(chrome.runtime.lastError);
-                    } else {
-                        resolve(tab);
-                    }
-                });
-            });
+            return ChromeWindowTabService.openTabsInOpenedWindowByID(options)
         } catch (error) {
             // console.error(errorLogMessageFormatter(this.loggingMessages.FILE_NAME, 'openTabsInExistingWindow'), error);
             throw error;
         }
     }
-    
-    errorLogMessageFormatter(customMessage) {
-        return FILE_CONSTANTS.BROWSER_CLASS.LOGGING_MESSAGES.FILE_NAME + ' - ' + customMessage + ' ';
+
+    async getCurrentOpenWindow() {
+        try {
+            return await ChromeWindowTabService.getCurrentOpenWindow();
+        } catch (error) {
+            // console.error(errorLogMessageFormatter(this.loggingMessages.FILE_NAME, 'getCurrentOpenWindow'), error);
+            throw error;
+        }
+    }
+
+    async openSelectedWindowTab(windowId, tabId) {
+        try {
+            const updatedWindowState = { state: 'maximized' }
+            const updatedTabState = { active: true }
+            if(await ChromeWindowTabService.updateOpenWindow(parseInt(windowId), updatedWindowState)) {
+                await ChromeWindowTabService.updateOpenTab(parseInt(tabId), updatedTabState);
+            }
+        } catch (error) {
+            // console.error(errorLogMessageFormatter(this.loggingMessages.FILE_NAME, 'updateOpenWindowState'), error);
+            throw error;
+        }
     }
 }
