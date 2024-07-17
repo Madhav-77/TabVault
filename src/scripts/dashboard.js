@@ -45,7 +45,6 @@ export class Dashboard {
     addEventListeners() {
         try {
             document.querySelectorAll('#window-nav-tabs span[data-bs-toggle="tab"]').forEach(bootstrapTab => { bootstrapTab.addEventListener("click", (ele) => { this.tabSwitch(ele) }) });
-            document.getElementById("clearData").addEventListener("click", () => { this.clearAllArchiveData() });
             document.getElementById("updateArchive").addEventListener("click", () => { this.archiveAndClose() });
             document.getElementById("getArchiveList").addEventListener("click", () => { console.log(this.getArchivedData()) });
             document.getElementById("closeSelectedWindows").addEventListener("click", () => { this.closeSelectedTabs() });
@@ -459,6 +458,14 @@ export class Dashboard {
             document.querySelectorAll(this.selectorConstants.CLASS_OPEN_TABLE + ".tab-redirect-col").forEach(ele => {
                 ele.querySelector("span").addEventListener("click", (element) => { this.maximizeSpecificWindowTab(ele.getAttribute("data-window-id"), ele.getAttribute("data-tab-id")) });
             });
+            const deleteArchiveTrigger = document.querySelector(".open-windows-table .deleteAllArchive");
+            if(this.archiveList.length) {
+                deleteArchiveTrigger.classList.remove("d-none");
+                deleteArchiveTrigger.setAttribute("title", this.titleMessages.DELETE_ALL_ARCHIVE);
+                deleteArchiveTrigger.addEventListener("click", (ele) => { this.clearAllArchiveData(); });
+            } else {
+                deleteArchiveTrigger.classList.add("d-none");
+            }
             hideLoader(".spinner-div");
         } catch (error) {
             // console.error(errorLogMessageFormatter(this.loggingMessages.FILE_NAME, 'initializeSVGEventListeners'), error);

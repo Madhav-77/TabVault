@@ -62,6 +62,9 @@ export const FILE_CONSTANTS = {
         LOGGING_MESSAGES: {
             FILE_NAME: "Home.js"
         },
+        TITLE_MESSAGES: {
+            CREATE_NEW_ARCHIVE: "Sets up an empty archive to store windows later"
+        }
     },
     BROWSER_CLASS: {
         LOGGING_MESSAGES: {

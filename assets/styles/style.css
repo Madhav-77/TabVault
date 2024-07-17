@@ -48,6 +48,7 @@
 
 /* Cursor style */
 .cursor-pointer { cursor: pointer; }
+.cursor-not-allowed { cursor: not-allowed; }
 
 /* Constant theme color classes */
 .primary-color-bg { background-color: var(--primary-color); }

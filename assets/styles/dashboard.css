@@ -81,8 +81,10 @@ hr {
     border-top: 1px solid var(--fonts-color);
     width: 100%;
 }
-.cursor-not-allowed {
-    cursor: not-allowed;
+
+.deleteAllArchive {
+    color: rgb(218, 0, 0);
+    font-weight: bold;
 }
 
 .header-div {

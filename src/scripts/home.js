@@ -8,10 +8,12 @@ export class Home {
         }
         this.archive = archive;
         this.loggingMessages = FILE_CONSTANTS.HOME_CLASS.LOGGING_MESSAGES;
+        this.titleMessages = FILE_CONSTANTS.HOME_CLASS.TITLE_MESSAGES;
     }
 
     initialize() {
         document.getElementById("create-new-archive").addEventListener('click', () => { this.createNewArchive(); });
+        document.getElementById("create-new-archive-info").setAttribute('title', this.titleMessages.CREATE_NEW_ARCHIVE);
     }
 
     /**
