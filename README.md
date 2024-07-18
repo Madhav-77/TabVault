@@ -31,10 +31,6 @@ Tab's Archive is a Chrome extension that can be used to close inactive Chrome wi
 
 **Client:** HTML, CSS, Bootstrap, JavaScript, Chrome API for data retrieval
 
-## Demo
-
-Insert gif or link to demo
-
 
 ## Screenshots
 
