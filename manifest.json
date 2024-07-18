@@ -3,7 +3,7 @@
     "name": "Tab's Archive",
     "description": "Tab's Archive First public alpha release for early feedback and testing.",
     "version": "1.0.0",
-    "version_name": "Alpha Release 1.0.0",
+    "version_name": "Alpha Release: alpha-1",
     "action": {
         "default_popup": "src/views/index.html",
         "default_icon": "assets/logos/logo thumbnail.png"
@@ -17,5 +17,5 @@
         "system.memory",
         "storage"
     ],
-    "minimum_chrome_version": "32"
+    "minimum_chrome_version": "88"
 }
