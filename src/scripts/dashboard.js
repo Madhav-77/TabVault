@@ -11,16 +11,15 @@ export class Dashboard {
         this.browser = new Browser();
         this.systemMemory = new SystemMemory();
 
+        this.tabsList = { open: true, archive: false };
         this.archive = archive;
         this.currentOpenWindowsList = null; // current open windows list
         this.currentSelectionOpenTab = []; // maintains a separate list for current selections in Open Tab
         this.currentSelectionArchiveTab = []; // maintains a separate list for current selections in Archive Tab
-        this.activePage = FILE_CONSTANTS.DASHBOARD_CLASS.TABS[0]; // list to check current active tab
         this.archiveList = this.archive.archiveData[ARCHIVE_LIST_NAME];
         this.windowsNameLookup = this.archive.archiveData[ARCHIVE_WINDOW_LOOKUP_NAME];
         
         // constants
-        this.tabsList = FILE_CONSTANTS.DASHBOARD_CLASS.TABS;
         this.selectorConstants = FILE_CONSTANTS.DASHBOARD_CLASS.SELECTORS;
         this.checkboxSelectorConstants = FILE_CONSTANTS.DASHBOARD_CLASS.SELECTORS.CHECKBOXES;
         this.titleMessages = FILE_CONSTANTS.DASHBOARD_CLASS.TITLE_MESSAGES;
@@ -29,6 +28,7 @@ export class Dashboard {
 
         this.memoryStatsIntervalId = "";
         this.windowBehindExtension = "";
+        this.deleteArchiveTrigger = "";
     }
 
     async initialize() {
@@ -45,11 +45,23 @@ export class Dashboard {
     addEventListeners() {
         try {
             document.querySelectorAll('#window-nav-tabs span[data-bs-toggle="tab"]').forEach(bootstrapTab => { bootstrapTab.addEventListener("click", (ele) => { this.tabSwitch(ele) }) });
-            document.getElementById("updateArchive").addEventListener("click", () => { this.archiveAndClose() });
-            document.getElementById("getArchiveList").addEventListener("click", () => { console.log(this.getArchivedData()) });
+            document.getElementById("archiveAndClose").addEventListener("click", () => { this.archiveAndClose() });
+            document.getElementById("archiveAndClose").setAttribute('title', this.titleMessages.ARCHIVE_AND_CLOSE);
             document.getElementById("closeSelectedWindows").addEventListener("click", () => { this.closeSelectedTabs() });
+            document.getElementById("closeSelectedWindows").setAttribute('title', this.titleMessages.CLOSE_WINDOWS);
             document.getElementById("openFromArchive").addEventListener("click", () => { this.openSelectedWindows() });
+            document.getElementById("openFromArchive").setAttribute('title', this.titleMessages.OPEN_WINDOWS);
             document.getElementById("deleteFromArchive").addEventListener("click", () => { this.deleteFromArchive() });
+            document.getElementById("deleteFromArchive").setAttribute('title', this.titleMessages.DELETE_FROM_ARCHIVE);
+            this.deleteArchiveTrigger = document.querySelector(".open-windows-table .deleteAllArchive");
+            this.deleteArchiveTrigger.addEventListener("click", () => { this.clearAllArchiveData(); });
+            this.deleteArchiveTrigger.setAttribute("title", this.titleMessages.DELETE_ALL_ARCHIVE);
+            if(this.archiveList.length) {
+                this.deleteArchiveTrigger.classList.remove("d-none");
+            } else {
+                this.deleteArchiveTrigger.classList.add("d-none");
+            }
+            // document.getElementById("getArchiveList").addEventListener("click", () => { console.log(this.getArchivedData()) });
         } catch (error) {
             // console.error(errorLogMessageFormatter(this.loggingMessages.FILE_NAME, 'addEventListeners'), error);
             throw error;
@@ -68,14 +80,16 @@ export class Dashboard {
             document.querySelectorAll(".select-all-window-checkbox").forEach(ele => ele.checked = false);
             if (currentTabId == this.selectorConstants.OPEN_WINDOWS_TAB) {
                 this.currentOpenWindowsList = await this.getCurrentOpenWindows();
-                this.activePage = this.tabsList[0];
+                this.tabsList.open = true;
+                this.tabsList.archive = false;
                 document.querySelector(this.selectorConstants.CLASS_ARCHIVE_TAB_BUTTONS).classList.add("d-none");
                 document.querySelector(this.selectorConstants.CLASS_OPEN_TAB_BUTTONS).classList.remove("d-none");
                 this.initializeTable(this.selectorConstants.CLASS_OPEN_TABLE, this.currentOpenWindowsList);
             }
             if (currentTabId == this.selectorConstants.ARCHIVE_WINDOWS_TAB) {
                 this.archiveList = this.archive.archiveData[ARCHIVE_LIST_NAME]
-                this.activePage = this.tabsList[1];
+                this.tabsList.open = false;
+                this.tabsList.archive = true;
                 document.querySelector(this.selectorConstants.CLASS_OPEN_TAB_BUTTONS).classList.add("d-none");
                 document.querySelector(this.selectorConstants.CLASS_ARCHIVE_TAB_BUTTONS).classList.remove("d-none");
                 this.initializeTable(this.selectorConstants.CLASS_ARCHIVE_TABLE, this.archiveList);
@@ -94,7 +108,6 @@ export class Dashboard {
             // console.error(errorLogMessageFormatter(this.loggingMessages.FILE_NAME, 'getCurrentOpenWindows'), error);
             throw error;
         }
-
     }
 
     /**
@@ -253,7 +266,7 @@ export class Dashboard {
                 tab.addEventListener('change', (ele) => {
                     const windowId = parseInt(ele.target.getAttribute("data-window-id"))
                     const tabId = parseInt(ele.target.getAttribute("data-tab-id"))
-                    if (this.activePage == this.tabsList[0]) { // check for only open windows tab
+                    if (this.tabsList.open) { // check for only open windows tab
                         if (ele.target.checked) {
                             // this.copyTabsInNewList(this.archiveList, this.currentOpenWindowsList, ele.target, windowId, tabId);
                             this.copyTabsInNewList(this.currentSelectionOpenTab, this.currentOpenWindowsList, ele.target, windowId, tabId);
@@ -292,7 +305,7 @@ export class Dashboard {
                     allTabsCheckboxes.forEach(tab => {
                         const tabId = parseInt(tab.getAttribute(this.selectorConstants.DATA_TAB_ID));
                         tab.checked = isChecked;
-                        if (this.activePage == this.tabsList[0]) { // check for only open windows tab
+                        if (this.tabsList.open) { // check for only open windows tab
                             if (isChecked) {
                                 // this.copyTabsInNewList(this.archiveList, this.currentOpenWindowsList, tab, windowId, tabId);
                                 this.copyTabsInNewList(this.currentSelectionOpenTab, this.currentOpenWindowsList, tab, windowId, tabId);
@@ -375,7 +388,7 @@ export class Dashboard {
                         this.archiveList.find(obj => obj.windowId == windowId).windowName = windowName;
                     }
                     this.updateArchive(this.archiveList);
-                    if(this.activePage == this.tabsList[0]) {
+                    if(this.tabsList.open) {
                         this.initializeTable(this.selectorConstants.CLASS_OPEN_TABLE, this.currentOpenWindowsList);
                     } else {
                         this.initializeTable(this.selectorConstants.CLASS_ARCHIVE_TABLE, this.archiveList);
@@ -433,7 +446,7 @@ export class Dashboard {
      * @param {String} parentTable - parent table query selector
      * @param {Array} data - List of Archived/Current windows
      */
-    async initializeTable(parentTable, data) {
+    async initializeTable(parentTable, data, find) {
         this.populateTableData(parentTable, data);
         this.initializeSelectAllWindowCheckBoxes(parentTable);
         this.initializeWindowCheckBoxes(parentTable);
@@ -458,13 +471,10 @@ export class Dashboard {
             document.querySelectorAll(this.selectorConstants.CLASS_OPEN_TABLE + ".tab-redirect-col").forEach(ele => {
                 ele.querySelector("span").addEventListener("click", (element) => { this.maximizeSpecificWindowTab(ele.getAttribute("data-window-id"), ele.getAttribute("data-tab-id")) });
             });
-            const deleteArchiveTrigger = document.querySelector(".open-windows-table .deleteAllArchive");
             if(this.archiveList.length) {
-                deleteArchiveTrigger.classList.remove("d-none");
-                deleteArchiveTrigger.setAttribute("title", this.titleMessages.DELETE_ALL_ARCHIVE);
-                deleteArchiveTrigger.addEventListener("click", (ele) => { this.clearAllArchiveData(); });
+                this.deleteArchiveTrigger.classList.remove("d-none");
             } else {
-                deleteArchiveTrigger.classList.add("d-none");
+                this.deleteArchiveTrigger.classList.add("d-none");
             }
             hideLoader(".spinner-div");
         } catch (error) {
@@ -503,105 +513,117 @@ export class Dashboard {
             let tableBody = "";
             let allWindowsExistsInArchive = true;
             let windowNameCount = 1;
-            for (let i = 0; i < tableData.length; i++) {
-                let windowExistsInArchive = false;
-                if (this.activePage == this.tabsList[0]) { // check for only open windows tab
-                    windowExistsInArchive = this.checkIfObjectExistInList(this.archiveList, "window", tableData[i])
-                    if (!windowExistsInArchive) {
-                        allWindowsExistsInArchive = false;
-                    }
-                }
-                let windowName = this.getWindowsNameFromLookup(tableData[i].windowId, `Window ${windowNameCount}`);
-                if(!windowName) {
-                    windowName = `Window ${windowNameCount}`;
-                    windowNameCount += 1;
-                }
+            if(this.tabsList.archive & !tableData.length) {
+                document.querySelector(parentTable + "tbody").classList.add("d-flex");
                 tableBody += `
-                    <tr class="window-row ${tableData[i].focused || tableData[i].windowId == this.windowBehindExtension.id ? 'focused' : ''}" aria-expanded="false" data-window-id=${tableData[i].windowId}>
-                        <th class="window-action-col" scope="row">
-                            <input class="select-window-checkbox ${windowExistsInArchive ? 'cursor-not-allowed' : ''}" data-type="window" data-window-id=${tableData[i].windowId} ${windowExistsInArchive ? 'disabled title="' + this.titleMessages.ALREADY_ARCHIVED + '"' : ''} type="checkbox">
-                        </th>
-                        <td class="window-index-col">${i + 1}</td>
-                        <td class="window-name-col">
-                            
-                            ${windowExistsInArchive ? `<span>${windowName} ${tableData[i].focused ? '<span class="focused-window-text">(Active window)</span>' : ''}</span>` : `
-                                <span class="edit-section">
-                                    <span>${windowName} ${tableData[i].focused ? '<span class="focused-window-text">(Active window)</span>' : ''}</span>
-                                    <span class="edit-window-name-button float-right cursor-pointer ${parent}" data-window-id=${tableData[i].windowId}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" width="16" height="16"><path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Zm.176 4.823L9.75 4.81l-6.286 6.287a.253.253 0 0 0-.064.108l-.558 1.953 1.953-.558a.253.253 0 0 0 .108-.064Zm1.238-3.763a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354Z"></path></svg>
-                                    </span>
-                                </span>
-                                <span class="save-section d-none">
-                                    <input class="form-control window-name-input form-control-sm float-left" value="${windowName}" data-initial-value="${windowName}" type="text">
-                                    <span class="save-window-name-button float-right cursor-pointer ${parent}" data-window-id=${tableData[i].windowId}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" width="16" height="16"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path></svg>
-                                    </span>
-                                    <span class="close-window-name-edit-button float-right cursor-pointer ${parent}" data-window-id=${tableData[i].windowId}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" width="16" height="16"><path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"></path></svg>
-                                    </span>
-                                </span>
-                            `}
-                        </td>
-                        <td class="window-tab-count-col text-center">${tableData[i].tabs.length}</td>
-                        <td class="window-expand-row-trigger-col text-center toggle-btn cursor-pointer" data-target="#${parent}-tab-details-${tableData[i].windowId}">
-                            <span class="down-arrow">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" width="16" height="16">
-                                    <path d="M12.78 5.22a.749.749 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.06 0L3.22 6.28a.749.749 0 1 1 1.06-1.06L8 8.939l3.72-3.719a.749.749 0 0 1 1.06 0Z"></path>
-                                </svg>
-                            </span>
-                            <span class="up-arrow d-none">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
-                                    <path d="M3.22 10.53a.749.749 0 0 1 0-1.06l4.25-4.25a.749.749 0 0 1 1.06 0l4.25 4.25a.749.749 0 1 1-1.06 1.06L8 6.811 4.28 10.53a.749.749 0 0 1-1.06 0Z"></path>
-                                </svg>
-                            </span>
-                        </td>
-                    </tr>
-                    <tr id="${parent}-tab-details-${tableData[i].windowId}" class="collapse">
+                    <tr class="archiveTabNoDataRow">
                         <td colspan="5">
-                            <div class="p-2">
-                                <table class="table table-hover m-0 open-tabs-table">
-                                    <thead class="fonts-color-bg">
-                                        <tr>
-                                            <th scope="col"></th>
-                                            <th scope="col">#</th>
-                                            <th scope="col">Title</th>
-                                            ${ this.activePage == this.tabsList[0] ? `<th scope="col"></th>` : `` }
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${tableData[i].tabs.map((tab, j) => {
-                                            let tabExistsInArchive = false;
-                                            if(this.activePage == this.tabsList[0]){ // check for only open windows tab
-                                                tabExistsInArchive = this.checkIfObjectExistInList(this.archiveList, "tab", tableData[i], tab.tabId);
-                                            }
-                                            return `<tr class="tab-row ${tab.active ? 'active' : ''}" data-tab-id=${tab.tabId}>
-                                                <th class="tab-action-col" scope="row">
-                                                    <input class="select-tab-checkbox ${tabExistsInArchive ? 'cursor-not-allowed' : ''}" data-window-id=${tableData[i].windowId} data-window-name="${windowName}" data-type="tab" data-tab-id=${tab.tabId} ${tabExistsInArchive ? 'disabled title=' + this.titleMessages.ALREADY_ARCHIVED + '"' : ''} type="checkbox">
-                                                </th>
-                                                <td class="tab-index-col">${j + 1}</td>
-                                                <td class="tab-title-col">
-                                                    ${tab.title}
-                                                    ${tab.active ? '<span class="focused-tab-text">(Active tab)</span>' : ''}
-                                                </td>
-                                                ${ this.activePage == this.tabsList[0] ? 
-                                                 `<td class="tab-redirect-col" data-window-id=${tableData[i].windowId} data-tab-id=${tab.tabId}>
-                                                    <span class="cursor-pointer" title="${this.titleMessages.GO_TO_TAB}">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" width="16" height="16">
-                                                            <path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2Zm6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1Z"></path>
-                                                        </svg>
-                                                    </span>
-                                                </td>` : `` }
-                                            </tr>
-                                        `}).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
+                            ${FILE_CONSTANTS.DASHBOARD_CLASS.NO_DATA_AVAILABLE}
                         </td>
-                    </tr>`;
-            }
-            // Enables/Disables Select all windows checkbox based on windows/tabs selection
-            if (allWindowsExistsInArchive && this.activePage == this.tabsList[0]) { // check for only open windows tab
-                this.disableAllWindowCheckbox(parentTable);
+                    </tr>`
+            } else {
+                document.querySelector(parentTable + "tbody").classList.remove("d-flex");
+                for (let i = 0; i < tableData.length; i++) {
+                    let windowExistsInArchive = false;
+                    if (this.tabsList.open) { // check for only open windows tab
+                        windowExistsInArchive = this.checkIfObjectExistInList(this.archiveList, "window", tableData[i])
+                        if (!windowExistsInArchive) {
+                            allWindowsExistsInArchive = false;
+                        }
+                    }
+                    let windowName = this.getWindowsNameFromLookup(tableData[i].windowId, `Window ${windowNameCount}`);
+                    if(!windowName) {
+                        windowName = `Window ${windowNameCount}`;
+                        windowNameCount += 1;
+                    }
+    
+                    tableBody += `
+                        <tr class="window-row ${tableData[i].focused || tableData[i].windowId == this.windowBehindExtension.id ? 'focused' : ''}" aria-expanded="false" data-window-id=${tableData[i].windowId}>
+                            <th class="window-action-col" scope="row">
+                                <input class="select-window-checkbox ${windowExistsInArchive ? 'cursor-not-allowed' : ''}" data-type="window" data-window-id=${tableData[i].windowId} ${windowExistsInArchive ? 'disabled title="' + this.titleMessages.ALREADY_ARCHIVED + '"' : ''} type="checkbox">
+                            </th>
+                            <td class="window-index-col">${i + 1}</td>
+                            <td class="window-name-col">
+                                
+                                ${windowExistsInArchive ? `<span>${windowName} ${tableData[i].focused ? '<span class="focused-window-text">(Active window)</span>' : ''}</span>` : `
+                                    <span class="edit-section">
+                                        <span>${windowName} ${tableData[i].focused ? '<span class="focused-window-text">(Active window)</span>' : ''}</span>
+                                        <span class="edit-window-name-button float-right cursor-pointer ${parent}" data-window-id=${tableData[i].windowId}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" width="16" height="16"><path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Zm.176 4.823L9.75 4.81l-6.286 6.287a.253.253 0 0 0-.064.108l-.558 1.953 1.953-.558a.253.253 0 0 0 .108-.064Zm1.238-3.763a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354Z"></path></svg>
+                                        </span>
+                                    </span>
+                                    <span class="save-section d-none">
+                                        <input class="form-control window-name-input form-control-sm float-left" value="${windowName}" data-initial-value="${windowName}" type="text">
+                                        <span class="save-window-name-button float-right cursor-pointer ${parent}" data-window-id=${tableData[i].windowId}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" width="16" height="16"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path></svg>
+                                        </span>
+                                        <span class="close-window-name-edit-button float-right cursor-pointer ${parent}" data-window-id=${tableData[i].windowId}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" width="16" height="16"><path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"></path></svg>
+                                        </span>
+                                    </span>
+                                `}
+                            </td>
+                            <td class="window-tab-count-col text-center">${tableData[i].tabs.length}</td>
+                            <td class="window-expand-row-trigger-col text-center toggle-btn cursor-pointer" data-target="#${parent}-tab-details-${tableData[i].windowId}">
+                                <span class="down-arrow">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" width="16" height="16">
+                                        <path d="M12.78 5.22a.749.749 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.06 0L3.22 6.28a.749.749 0 1 1 1.06-1.06L8 8.939l3.72-3.719a.749.749 0 0 1 1.06 0Z"></path>
+                                    </svg>
+                                </span>
+                                <span class="up-arrow d-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+                                        <path d="M3.22 10.53a.749.749 0 0 1 0-1.06l4.25-4.25a.749.749 0 0 1 1.06 0l4.25 4.25a.749.749 0 1 1-1.06 1.06L8 6.811 4.28 10.53a.749.749 0 0 1-1.06 0Z"></path>
+                                    </svg>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr id="${parent}-tab-details-${tableData[i].windowId}" class="collapse">
+                            <td colspan="5">
+                                <div class="p-2">
+                                    <table class="table table-hover m-0 open-tabs-table">
+                                        <thead class="fonts-color-bg">
+                                            <tr>
+                                                <th scope="col"></th>
+                                                <th scope="col">#</th>
+                                                <th scope="col">Title</th>
+                                                ${ this.tabsList.open ? `<th scope="col"></th>` : `` }
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${tableData[i].tabs.map((tab, j) => {
+                                                let tabExistsInArchive = false;
+                                                if(this.tabsList.open){ // check for only open windows tab
+                                                    tabExistsInArchive = this.checkIfObjectExistInList(this.archiveList, "tab", tableData[i], tab.tabId);
+                                                }
+                                                return `<tr class="tab-row ${tab.active ? 'active' : ''}" data-tab-id=${tab.tabId}>
+                                                    <th class="tab-action-col" scope="row">
+                                                        <input class="select-tab-checkbox ${tabExistsInArchive ? 'cursor-not-allowed' : ''}" data-window-id=${tableData[i].windowId} data-window-name="${windowName}" data-type="tab" data-tab-id=${tab.tabId} ${tabExistsInArchive ? 'disabled title=' + this.titleMessages.ALREADY_ARCHIVED + '"' : ''} type="checkbox">
+                                                    </th>
+                                                    <td class="tab-index-col">${j + 1}</td>
+                                                    <td class="tab-title-col">
+                                                        ${tab.title}
+                                                        ${tab.active ? '<span class="focused-tab-text">(Active tab)</span>' : ''}
+                                                    </td>
+                                                    ${ this.tabsList.open ? 
+                                                     `<td class="tab-redirect-col" data-window-id=${tableData[i].windowId} data-tab-id=${tab.tabId}>
+                                                        <span class="cursor-pointer" title="${this.titleMessages.GO_TO_TAB}">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" width="16" height="16">
+                                                                <path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2Zm6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1Z"></path>
+                                                            </svg>
+                                                        </span>
+                                                    </td>` : `` }
+                                                </tr>
+                                            `}).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>`;
+                }
+                // Enables/Disables Select all windows checkbox based on windows/tabs selection
+                if (allWindowsExistsInArchive && this.tabsList.open) { // check for only open windows tab
+                    this.disableAllWindowCheckbox(parentTable);
+                }
             }
             document.querySelector(parentTable + "tbody").innerHTML = tableBody;
             this.accordianBehaviorForTable();   
@@ -734,7 +756,7 @@ export class Dashboard {
                     setTimeout(async () => {
                         this.currentOpenWindowsList = await this.getCurrentOpenWindows();
                         this.resetAllWindowCheckbox(this.selectorConstants.CLASS_OPEN_TABLE);
-                        this.initializeTable(this.selectorConstants.CLASS_OPEN_TABLE, this.currentOpenWindowsList);
+                        this.initializeTable(this.selectorConstants.CLASS_OPEN_TABLE, this.currentOpenWindowsList, "1");
                     }, 200);
                 }
             } else {
@@ -793,11 +815,13 @@ export class Dashboard {
                         this.browser.closeSelectedTabs(tabIds)
                         // If all tabs are selected and closed
                         // Setting timeout for Chrome window to get closed
-                        setTimeout(async () => {
-                            this.currentOpenWindowsList = await this.getCurrentOpenWindows();
-                            this.resetAllWindowCheckbox(this.selectorConstants.CLASS_OPEN_TABLE);
-                            this.initializeTable(this.selectorConstants.CLASS_OPEN_TABLE, this.currentOpenWindowsList);
-                        }, 100);
+                        if(!isFromArchiveAndClose) {
+                            setTimeout(async () => {
+                                this.currentOpenWindowsList = await this.getCurrentOpenWindows();
+                                this.resetAllWindowCheckbox(this.selectorConstants.CLASS_OPEN_TABLE);
+                                this.initializeTable(this.selectorConstants.CLASS_OPEN_TABLE, this.currentOpenWindowsList);
+                            }, 100);
+                        }
                     }
                 }
             } else {
@@ -957,6 +981,8 @@ export class Dashboard {
             allCollapsibles.forEach(function(element) {
                 if (element !== targetElement) {
                     element.classList.remove('show');
+                    element.previousElementSibling.querySelector('.window-expand-row-trigger-col .up-arrow').classList.add('d-none');
+                    element.previousElementSibling.querySelector('.window-expand-row-trigger-col .down-arrow').classList.remove('d-none');
                 }
             });
             // Toggle the target element

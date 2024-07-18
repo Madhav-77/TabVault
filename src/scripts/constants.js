@@ -6,7 +6,6 @@ export const ARCHIVE_INIT_VALUE = {
 };
 export const FILE_CONSTANTS = {
     DASHBOARD_CLASS: {
-        TABS: ["open", "archive"],
         SELECTORS: {
             CLASS_OPEN_TABLE: ".open-windows-table ", // open windows tab div, space at end should not be removed
             CLASS_ARCHIVE_TABLE: ".archive-windows-table ", // archive windows tab div, space at end should not be removed
@@ -38,7 +37,7 @@ export const FILE_CONSTANTS = {
             GO_TO_TAB: "Go to this tab",
             ARCHIVE_AND_CLOSE: "Store selected windows in archive and close",
             CLOSE_WINDOWS: "Close selected windows without storing",
-            OPEN_WINDOWS: "Open selected windows",
+            OPEN_WINDOWS: "Retrive and open selected windows",
             DELETE_FROM_ARCHIVE: "Delete selected windows from archive",
             DELETE_ALL_ARCHIVE: "Delete all data from archive permanently"
         },
@@ -48,7 +47,8 @@ export const FILE_CONSTANTS = {
             ARCHIVE_CLOSE_WINDOWS: "This will store selected windows/tabs in archive and close it. Press Ok to continue.",
             DELETE_ARCHIVE: "Are you sure you want to Delete selected windows/tabs from archive? This action cannot be reversed.",
             DELETE_ALL_ARCHIVE: "This will clear all the stored data, and action cannot be reversed. Press Ok to continue.",
-        }
+        },
+        NO_DATA_AVAILABLE: "No windows available in archive."
     },
     ARCHIVE_CLASS: {
         LOGGING_MESSAGES: {

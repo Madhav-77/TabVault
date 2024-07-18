@@ -71,13 +71,27 @@
 }
 
 /* Scrollbar style */
-.body-container::-webkit-scrollbar {
+.body-container::-webkit-scrollbar, tbody::-webkit-scrollbar {
     width: 8px;
 }
-.body-container::-webkit-scrollbar-track {
+.body-container::-webkit-scrollbar-track, tbody::-webkit-scrollbar-track {
     background: var(--fonts-color-light);
 }
-.body-container::-webkit-scrollbar-thumb {
+.body-container::-webkit-scrollbar-thumb, tbody::-webkit-scrollbar-thumb {
     background: var(--scroll-dark-gray);
     border-radius: 5px;
+}
+
+/* Button styles */
+.btn-outline-custom-style{
+    color: var(--fonts-color);
+    border-color: var(--fonts-color);
+    border-radius: 55px;
+    padding: 7px 15px;
+}
+.btn-outline-custom-style:hover {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    border-color: var(--secondary-color);
+    text-decoration: none;
 }

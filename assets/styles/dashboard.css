@@ -8,6 +8,24 @@
     flex-grow: 1;
 }
 
+.windows-table {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+.windows-table .tab-content {
+    flex-grow: 1;
+}
+.windows-table .tab-content table {
+    display: flex;
+    flex-direction: column;
+}
+.windows-table .tab-content table tbody#open-windows-table-body, .windows-table .tab-content table tbody#archive-windows-table-body {
+    overflow-y: auto;
+    height: 100px;
+    flex-grow: 1;
+}
+
 .spinner-div {
     display: flex;
     flex-direction: column;
@@ -40,19 +58,20 @@
     font-size: var(--regular-font-size);
     font-weight: normal;
 }
-.windows-table .window-action-col {
+
+.windows-table .window-action-col, .windows-table .action-col-header {
     width: 5%;
 }
-.windows-table .window-index-col {
+.windows-table .window-index-col, .windows-table .index-col-header {
     width: 5%;
 }
-.windows-table .window-name-col {
+.windows-table .window-name-col, .windows-table .window-col-header {
     width: 70%;
 }
-.windows-table .window-tab-count-col {
+.windows-table .window-tab-count-col, .windows-table .tab-count-col-header {
     width: 18%;
 }
-.windows-table .window-expand-row-trigger-col {
+.windows-table .window-expand-row-trigger-col, .windows-table .delete-all-archive-col-header {
     width: 2%;
 }
 
@@ -117,3 +136,18 @@ hr {
 .window-name-input {
     width: 375px;
 }
+
+#archiveAndClose svg, #closeSelectedWindows svg, #openFromArchive svg, #deleteFromArchive svg {
+    margin-bottom: 2px;
+}
+
+.archive-windows-table tbody .archiveTabNoDataRow {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+}
+.archive-windows-table tbody .archiveTabNoDataRow td {
+    flex-grow: 1;
+    text-align: center;
+}
+
