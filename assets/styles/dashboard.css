@@ -93,7 +93,7 @@
 
 .windows-table tr.window-row.focused, 
 .windows-table tr.tab-row.active {
-    background-color: #c8ce8e;
+    background-color: var(--active-tab-windows-green);
 }
 
 hr {
@@ -102,7 +102,7 @@ hr {
 }
 
 .deleteAllArchive {
-    color: rgb(218, 0, 0);
+    color: var(--delete-red);
     font-weight: bold;
 }
 
