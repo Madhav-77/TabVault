@@ -1,0 +1,21 @@
+{
+    "manifest_version": 3,
+    "name": "Tab's Archive",
+    "description": "Tab's Archive First public alpha release for early feedback and testing.",
+    "version": "1.0.0-alpha.1",
+    "version_name": "Alpha Release 1",
+    "action": {
+        "default_popup": "src/views/index.html",
+        "default_icon": "assets/logos/logo thumbnail.png"
+    },
+    "author": {
+        "email": "madhavtrivedi.work17@gmail.com"
+    },
+    "permissions": [
+        "tabs",
+        "windows",
+        "system.memory",
+        "storage"
+    ],
+    "minimum_chrome_version": "32"
+}

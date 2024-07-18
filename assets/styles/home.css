@@ -1,0 +1,21 @@
+/* Home page styles */
+.home-page-body {
+    display: flex !important;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.home-page-logo img {
+    height: 4rem;
+}
+.more-info-icon {
+    cursor: pointer;
+}
+.archive-button-div{
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+}
+.archive-button-div .spinner-grow{
+    color: var(--secondary-color);
+}

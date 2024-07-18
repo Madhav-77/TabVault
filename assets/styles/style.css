@@ -1,0 +1,99 @@
+@font-face {
+    font-family: 'Aoboshi One';
+    src: url('assets\fonts\Aoboshi One.ttf') format('truetype');
+    /* Adjust the path to the font file */
+    font-weight: normal;
+    font-style: normal;
+}
+
+:root {
+    --primary-color: #4A5D5E;
+    --secondary-color: #FEDC02;
+    --fonts-color: #D2DBC8;
+    --fonts-color-light: #DFE9D5;
+    --scroll-dark-gray: #7C8276;
+    --delete-red: #dc3545;
+    --active-tab-windows-green: #B3C9B0;
+    --large-header-font-size: 20px;
+    --header-font-size: 18px;
+    --sub-header-font-size: 16px;
+    --regular-font-size: 14px;
+}
+
+
+/* Global font style */
+* { font-family: 'Aoboshi One', sans-serif; }
+.dark-color-bg>* { color: var(--fonts-color); }
+.light-color-bg>* { color: var(--primary-color); }
+
+/* Constant font size classes */
+.fs-14 { font-size: var(--regular-font-size); }
+.fs-b-14 {
+    font-size: var(--regular-font-size);
+    font-weight: bold;
+}
+.fs-16 { font-size: var(--sub-header-font-size); }
+.fs-b-16 {
+    font-size: var(--sub-header-font-size);
+    font-weight: bold;
+}
+.fs-18 { font-size: var(--header-font-size); }
+.fs-b-18 {
+    font-size: var(--header-font-size);
+    font-weight: bold;
+}
+.fs-20 { font-size: var(--large-header-font-size); }
+.fs-b-20 {
+    font-size: var(--large-header-font-size);
+    font-weight: bold;
+}
+
+/* Cursor style */
+.cursor-pointer { cursor: pointer; }
+.cursor-not-allowed { cursor: not-allowed; }
+
+/* Constant theme color classes */
+.primary-color-bg { background-color: var(--primary-color); }
+.primary-color-font { color: var(--primary-color); }
+.fonts-color-bg { background-color: var(--fonts-color) }
+.fonts-color-font { color: var(--fonts-color) }
+.secondary-color-bg { background-color: var(--secondary-color) }
+.secondary-color-font { color: var(--secondary-color) }
+
+/* Custom styling */
+/* Main body */
+.main-frame {
+    width: 700px;
+    height: 500px;
+}
+.body-container{
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+}
+
+/* Scrollbar style */
+.body-container::-webkit-scrollbar, tbody::-webkit-scrollbar {
+    width: 8px;
+}
+.body-container::-webkit-scrollbar-track, tbody::-webkit-scrollbar-track {
+    background: var(--fonts-color-light);
+}
+.body-container::-webkit-scrollbar-thumb, tbody::-webkit-scrollbar-thumb {
+    background: var(--scroll-dark-gray);
+    border-radius: 5px;
+}
+
+/* Button styles */
+.btn-outline-custom-style{
+    color: var(--fonts-color);
+    border-color: var(--fonts-color);
+    border-radius: 55px;
+    padding: 7px 15px;
+}
+.btn-outline-custom-style:hover {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    border-color: var(--secondary-color);
+    text-decoration: none;
+}

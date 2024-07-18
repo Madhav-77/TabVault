@@ -1,0 +1,153 @@
+/* Dashboard styles */
+.dashboard-page {
+    flex-direction: column;
+}
+
+.dashboard-page-body {
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.windows-table {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+.windows-table .tab-content {
+    flex-grow: 1;
+}
+.windows-table .tab-content table {
+    display: flex;
+    flex-direction: column;
+}
+.windows-table .tab-content table tbody#open-windows-table-body, .windows-table .tab-content table tbody#archive-windows-table-body {
+    overflow-y: auto;
+    height: 100px;
+    flex-grow: 1;
+}
+
+.spinner-div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-grow: 1;
+    justify-content: center;
+}
+
+/* Navigation tabs */
+#window-nav-tabs>.nav-item .nav-link.active {
+    color: var(--primary-color);
+    background-color: var(--fonts-color);
+    border-color: var(--fonts-color);
+}
+#window-nav-tabs>.nav-tabs .nav-link:hover {
+    border-color: var(--fonts-color);
+}
+
+/* Open windows table */
+.windows-table table>tbody {
+    background-color: var(--fonts-color-light);
+}
+.windows-table table>tbody {
+    height: 100%;
+    overflow-y: auto;
+}
+.windows-table table thead th,
+.windows-table table tbody th,
+.windows-table table tbody td{
+    font-size: var(--regular-font-size);
+    font-weight: normal;
+}
+
+.windows-table .window-action-col, .windows-table .action-col-header {
+    width: 5%;
+}
+.windows-table .window-index-col, .windows-table .index-col-header {
+    width: 5%;
+}
+.windows-table .window-name-col, .windows-table .window-col-header {
+    width: 70%;
+}
+.windows-table .window-tab-count-col, .windows-table .tab-count-col-header {
+    width: 18%;
+}
+.windows-table .window-expand-row-trigger-col, .windows-table .delete-all-archive-col-header {
+    width: 2%;
+}
+
+.windows-table .tab-action-col {
+    width: 5%;
+}
+.windows-table .tab-index-col {
+    width: 5%;
+}
+.windows-table .open-windows-table .tab-title-col {
+    width: 85%;
+}
+.windows-table .archive-windows-table .tab-title-col {
+    width: 90%;
+}
+.windows-table .open-windows-table .tab-redirect-col {
+    width: 5%;
+}
+
+.windows-table tr.window-row.focused, 
+.windows-table tr.tab-row.active {
+    background-color: var(--active-tab-windows-green);
+}
+
+hr {
+    border-top: 1px solid var(--fonts-color);
+    width: 100%;
+}
+
+.deleteAllArchive {
+    color: var(--delete-red);
+    font-weight: bold;
+}
+
+.header-div {
+    position: relative;
+}
+.back-to-index {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin-left: 4%;
+}
+.back-to-index svg {
+    height: 30px;
+    width: 30px;
+    cursor: pointer;
+}
+.back-to-index a {
+    text-decoration: none;
+    color: inherit;
+}
+.back-to-index a:hover, .back-to-index a:focus, .back-to-index a:active {
+    text-decoration: none;
+    color: inherit;
+}
+
+.memory-stats, .windows-table {
+    max-width: 100%;
+}
+
+.window-name-input {
+    width: 375px;
+}
+
+#archiveAndClose svg, #closeSelectedWindows svg, #openFromArchive svg, #deleteFromArchive svg {
+    margin-bottom: 2px;
+}
+
+.archive-windows-table tbody .archiveTabNoDataRow {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+}
+.archive-windows-table tbody .archiveTabNoDataRow td {
+    flex-grow: 1;
+    text-align: center;
+}
+
