@@ -37,6 +37,7 @@ export class Dashboard {
         this.currentOpenWindowsList = await this.getCurrentOpenWindows();
         this.addEventListeners();
         this.initializeTable(this.selectorConstants.CLASS_OPEN_TABLE, this.currentOpenWindowsList);
+        this.setWindowCount();
     }
 
     /**
@@ -78,6 +79,7 @@ export class Dashboard {
         try {
             const currentTabId = ele.target.getAttribute("id");
             document.querySelectorAll(".select-all-window-checkbox").forEach(ele => ele.checked = false);
+            this.setWindowCount();
             if (currentTabId == this.selectorConstants.OPEN_WINDOWS_TAB) {
                 this.currentOpenWindowsList = await this.getCurrentOpenWindows();
                 this.tabsList.open = true;
@@ -98,6 +100,11 @@ export class Dashboard {
             // console.error(errorLogMessageFormatter(this.loggingMessages.FILE_NAME, 'tabSwitch'), error);
             throw error;
         }
+    }
+
+    setWindowCount() {
+        document.querySelector(".openWindowsCount").innerHTML = "(" + this.currentOpenWindowsList.length + ")";
+        document.querySelector(".archiveWindowsCount").innerHTML = "(" + this.archiveList.length + ")";
     }
 
     async getCurrentOpenWindows() {
@@ -446,7 +453,7 @@ export class Dashboard {
      * @param {String} parentTable - parent table query selector
      * @param {Array} data - List of Archived/Current windows
      */
-    async initializeTable(parentTable, data, find) {
+    async initializeTable(parentTable, data) {
         this.populateTableData(parentTable, data);
         this.initializeSelectAllWindowCheckBoxes(parentTable);
         this.initializeWindowCheckBoxes(parentTable);
@@ -756,7 +763,8 @@ export class Dashboard {
                     setTimeout(async () => {
                         this.currentOpenWindowsList = await this.getCurrentOpenWindows();
                         this.resetAllWindowCheckbox(this.selectorConstants.CLASS_OPEN_TABLE);
-                        this.initializeTable(this.selectorConstants.CLASS_OPEN_TABLE, this.currentOpenWindowsList, "1");
+                        this.initializeTable(this.selectorConstants.CLASS_OPEN_TABLE, this.currentOpenWindowsList);
+                        this.setWindowCount();
                     }, 200);
                 }
             } else {

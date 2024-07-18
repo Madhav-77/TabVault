@@ -1,8 +1,9 @@
 {
     "manifest_version": 3,
     "name": "Tab's Archive",
-    "description": "Tab's Archive First release Dev testing",
-    "version": "0.1.0",
+    "description": "Tab's Archive First public alpha release for early feedback and testing.",
+    "version": "1.0.0-alpha.1",
+    "version_name": "Alpha Release 1",
     "action": {
         "default_popup": "src/views/index.html",
         "default_icon": "assets/logos/logo thumbnail.png"
@@ -14,8 +15,7 @@
         "tabs",
         "windows",
         "system.memory",
-        "system.cpu",
-        "fileSystem",
         "storage"
-    ]
+    ],
+    "minimum_chrome_version": "32"
 }
