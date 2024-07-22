@@ -66,7 +66,6 @@ export class Dashboard {
      */
     enableDisableDeleteArchiveButton() {
         try {
-            console.log(this.archiveList.length)
             const deleteArchiveTrigger = document.querySelectorAll(".deleteAllArchive");
             deleteArchiveTrigger.forEach((ele) => {
                 if(this.archiveList.length){
@@ -588,7 +587,6 @@ export class Dashboard {
                         }
                     }
                     let windowName = this.getWindowsNameFromLookup(tableData[i].windowId, `Window ${windowNameCount}`);
-                    console.log(windowName)
                     if(!windowName) {
                         windowName = `Window ${windowNameCount}`;
                         windowNameCount += 1;
