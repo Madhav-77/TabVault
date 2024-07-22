@@ -48,6 +48,7 @@ export const FILE_CONSTANTS = {
             DELETE_ARCHIVE: "Are you sure you want to Delete selected windows/tabs from archive? This action cannot be reversed.",
             DELETE_ALL_ARCHIVE: "This will clear all the stored data, and action cannot be reversed. Press Ok to continue.",
         },
+        NO_SELECTION: "Please select at least 1 window/tab.",
         NO_DATA_AVAILABLE: "No windows available in archive."
     },
     ARCHIVE_CLASS: {

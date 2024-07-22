@@ -151,3 +151,12 @@ hr {
     text-align: center;
 }
 
+.deleteAllArchive.btn:hover {
+    color: var(--delete-red);
+}
+
+button#archiveAndClose:disabled, button#closeSelectedWindows:disabled, button#openFromArchive:disabled, button#deleteFromArchive:disabled {
+    color: var(--fonts-color);
+    cursor: not-allowed;
+}
+

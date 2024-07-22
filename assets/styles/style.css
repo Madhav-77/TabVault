@@ -91,9 +91,17 @@
     border-radius: 55px;
     padding: 7px 15px;
 }
-.btn-outline-custom-style:hover {
+.btn-outline-custom-style:hover:enabled {
     background-color: var(--secondary-color);
     color: var(--primary-color);
     border-color: var(--secondary-color);
     text-decoration: none;
+}
+.btn.focus, .btn:focus {
+    box-shadow: none;
+}
+
+.form-control:focus {
+    border-color: transparent;
+    box-shadow: none;
 }
