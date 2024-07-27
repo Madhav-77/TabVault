@@ -9,7 +9,7 @@ Tab's Archive is a Chrome extension that can be used to close inactive Chrome wi
 
 ## Version
 
-[![Version](https://img.shields.io/badge/version-1.0.1.alpha.3-blue.svg)](https://semver.org)
+[![Version](https://img.shields.io/badge/version-1.0.2.alpha.3-blue.svg)](https://semver.org)
 
 
 ## Features
