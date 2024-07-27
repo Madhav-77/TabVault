@@ -896,7 +896,7 @@ export class Dashboard {
         try {
             for (let i = 0; i < this.currentSelectionArchiveTab.length; i++) {
                 const newWindowId = this.currentSelectionArchiveTab[i].newWindowId;
-                const isWindowOpen = this.checkIfWindowOpen(newWindowId);
+                const isWindowOpen = await this.checkIfWindowOpen(newWindowId);
                 const tabUrls = this.currentSelectionArchiveTab[i].tabs.map(tab => tab.url);
                 if(newWindowId && isWindowOpen) {
                     tabUrls.forEach(async url => {
